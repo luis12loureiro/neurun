@@ -43,17 +43,22 @@ go build -o bin/server ./cmd/server
 ./bin/server
 ```
 
+---
+
 ## Project Structure
 
-workflow-engine/
-├── api/                  # Protobuf definitions and generated code
-├── cmd/server/           # Main entry point for the gRPC server
-├── internal/             # Core business logic and gRPC handlers
-├── config/               # Configuration files
-├── pkg/                  # Utility libraries (optional)
-├── scripts/              # Helper scripts (e.g., code generation)
-├── go.mod
-└── README.md
+- `api/` – Protobuf definitions and generated code
+  - `proto/` – `.proto` files
+  - `gen/` – Generated Go code from `protoc`
+- `cmd/server/` – Main entry point for the gRPC server (`main.go`)
+- `internal/` – Core business logic and gRPC service implementation
+  - `grpc/` – Server creation
+- `scripts/` – Helper scripts (e.g., code generation)
+- `go.mod` – Go module definition
+- `go.sum` – Dependency checksums
+- `README.md` – Project documentation
+
+---
 
 ## License
 
