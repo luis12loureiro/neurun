@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package neurun;
+
+option go_package = "github.com/luis12loureiro/neurun/api/gen/neurun";
+
+service WorkflowService {
+    rpc CreateWorkflow(CreateWorkflowRequest) returns (WorkflowResponse);
+    rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (WorkflowResponse);
+    rpc GetWorkflow(GetWorkflowRequest) returns (WorkflowResponse);
+}
+
+message Task {
+    string id = 1;
+    string type = 2;
+    string payload = 3;
+    string next = 4;
+}
+
+message CreateWorkflowRequest {
+    string name = 1;
+    repeated Task tasks = 2;
+}
+
+message ExecuteWorkflowRequest {
+    string workflowId = 1;
+}
+
+message GetWorkflowRequest {
+    string workflow_id = 1;
+}
+
+message WorkflowResponse {
+    string id = 1;
+    string name = 2;
+}

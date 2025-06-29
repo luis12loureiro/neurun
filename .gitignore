@@ -27,6 +27,9 @@ go.work.sum
 # env file
 .env
 
+# Protobuf generated files (optional, see note)
+api/gen/**/*.pb.go
+
 # Editor/IDE
 # .idea/
 # .vscode/
