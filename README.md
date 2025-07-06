@@ -46,7 +46,6 @@ go build -o bin/server ./cmd/server
   - `gen/` – Generated Go code from `protoc`
 - `cmd/server/` – Main entry point for the gRPC server (`main.go`)
 - `internal/` – Core business logic and gRPC service implementation
-  - `grpc/` – Server creation
 - `scripts/` – Helper scripts (e.g., code generation)
 - `go.mod` – Go module definition
 - `go.sum` – Dependency checksums
