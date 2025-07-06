@@ -2,8 +2,6 @@
 
 A **workflow automation engine** implemented as a **gRPC server in Go**. It enables users to define workflows composed of multiple tasks with event triggers, retries, delays, and conditional execution.
 
----
-
 ## Features
 
 - Define workflows with multiple tasks  
@@ -11,8 +9,6 @@ A **workflow automation engine** implemented as a **gRPC server in Go**. It enab
 - Support for retries and delays on tasks  
 - Conditional task execution  
 - gRPC API for easy integration and extensibility  
-
----
 
 ## Getting Started
 
@@ -43,8 +39,6 @@ go build -o bin/server ./cmd/server
 ./bin/server
 ```
 
----
-
 ## Project Structure
 
 - `api/` – Protobuf definitions and generated code
@@ -57,8 +51,6 @@ go build -o bin/server ./cmd/server
 - `go.mod` – Go module definition
 - `go.sum` – Dependency checksums
 - `README.md` – Project documentation
-
----
 
 ## License
 
