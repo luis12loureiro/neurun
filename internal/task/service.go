@@ -1,31 +1,26 @@
 package task
 
 import (
-	d "github.com/luis12loureiro/neurun/internal/task/domain"
+	"github.com/luis12loureiro/neurun/internal/task/domain"
 )
 
-type Repository interface {
-	Create(t d.Task) error
-	GetTask(id string) (d.Task, error)
-}
-
 type Service interface {
-	Create(t d.Task) error
-	GetTask(id string) (d.Task, error)
+	Create(t domain.Task) error
+	GetTask(id string) (domain.Task, error)
 }
 
 type service struct {
-	r Repository
+	r domain.Repository
 }
 
-func NewService(r Repository) *service {
+func NewService(r domain.Repository) *service {
 	return &service{r}
 }
 
-func (s *service) Create(t d.Task) error {
+func (s *service) Create(t domain.Task) error {
 	return s.r.Create(t)
 }
 
-func (s *service) GetTask(id string) (d.Task, error) {
+func (s *service) GetTask(id string) (domain.Task, error) {
 	return s.r.GetTask(id)
 }

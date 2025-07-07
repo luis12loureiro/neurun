@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	domain "github.com/luis12loureiro/neurun/internal/task/domain"
+	"github.com/luis12loureiro/neurun/internal/task/domain"
 )
 
 type JSONRepo struct {
@@ -19,7 +19,8 @@ func NewJSONRepository(path string, filename string) *JSONRepo {
 }
 
 func (r *JSONRepo) Create(t domain.Task) error {
-	file, err := os.OpenFile("big_encode.json", os.O_APPEND, os.ModePerm)
+	filePath := filepath.Join(r.path, r.filename)
+	file, err := os.OpenFile(filePath, os.O_APPEND, os.ModePerm)
 	if err != nil {
 		return errors.New("failed to open task file")
 	}

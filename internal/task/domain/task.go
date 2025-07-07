@@ -1,4 +1,4 @@
-package task
+package domain
 
 import (
 	"fmt"
@@ -36,6 +36,11 @@ type TaskResult struct {
 	Status  ResultStatus
 	Output  map[string][]interface{}
 	Message string
+}
+
+type Repository interface {
+	Create(t Task) error
+	GetTask(id string) (Task, error)
 }
 
 func (t *Task) Execute() (*TaskResult, error) {
