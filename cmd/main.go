@@ -7,8 +7,9 @@ import (
 	"net"
 
 	pb "github.com/luis12loureiro/neurun/api/gen"
-	grpcimpl "github.com/luis12loureiro/neurun/internal/task"
-	"github.com/luis12loureiro/neurun/internal/task/repository"
+	ws "github.com/luis12loureiro/neurun/internal/workflow"
+	wh "github.com/luis12loureiro/neurun/internal/workflow/handler"
+	wr "github.com/luis12loureiro/neurun/internal/workflow/repository"
 	"google.golang.org/grpc"
 )
 
@@ -24,9 +25,10 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	repo := repository.NewJSONRepository("", "")
-	svc := grpcimpl.NewService(repo)
-	pb.RegisterWorkflowServiceServer(s, svc)
+	repo := wr.NewJSONRepository("", "")
+	svc := ws.NewService(repo)
+	handler := wh.NewServer(svc)
+	pb.RegisterWorkflowServiceServer(s, handler)
 
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luis12loureiro/neurun/internal/task/domain"
+	"github.com/luis12loureiro/neurun/internal/workflow/domain"
 )
 
 type JSONRepo struct {
@@ -18,11 +18,11 @@ func NewJSONRepository(path string, filename string) domain.Repository {
 	return &JSONRepo{path: path, filename: filename}
 }
 
-func (r *JSONRepo) Create(t domain.Task) error {
+func (r *JSONRepo) Create(t domain.Worklow) error {
 	filePath := filepath.Join(r.path, r.filename)
 	file, err := os.OpenFile(filePath, os.O_APPEND, os.ModePerm)
 	if err != nil {
-		return errors.New("failed to open task file")
+		return errors.New("failed to open workflow file")
 	}
 	defer file.Close()
 
@@ -30,20 +30,20 @@ func (r *JSONRepo) Create(t domain.Task) error {
 	return encoder.Encode(t)
 }
 
-func (r *JSONRepo) GetTask(id string) (domain.Task, error) {
-	var task domain.Task
+func (r *JSONRepo) Get(id string) (domain.Worklow, error) {
+	var w domain.Worklow
 
 	filePath := filepath.Join(r.path, r.filename)
 	file, err := os.Open(filePath)
 	if err != nil {
-		return task, errors.New("task file not found")
+		return w, errors.New("task file not found")
 	}
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&task); err != nil {
-		return task, errors.New("task not found")
+	if err := decoder.Decode(&w); err != nil {
+		return w, errors.New("task not found")
 	}
 
-	return task, nil
+	return w, nil
 }

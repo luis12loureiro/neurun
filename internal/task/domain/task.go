@@ -76,5 +76,5 @@ func (t *Task) Execute() (*TaskResult, error) {
 }
 
 func (t *Task) String() string {
-	return fmt.Sprintf("ID %s, Name %s, Type %s", t.Id, t.Name, t.Type)
+	return fmt.Sprintf("Id %s, Name %s, Type %s", t.Id, t.Name, t.Type)
 }

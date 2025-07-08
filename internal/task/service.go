@@ -1,8 +1,6 @@
 package task
 
-import (
-	"github.com/luis12loureiro/neurun/internal/task/domain"
-)
+import "github.com/luis12loureiro/neurun/internal/task/domain"
 
 type Service interface {
 	Create(t domain.Task) error
@@ -13,7 +11,7 @@ type service struct {
 	r domain.Repository
 }
 
-func NewService(r domain.Repository) *service {
+func NewService(r domain.Repository) Service {
 	return &service{r}
 }
 
