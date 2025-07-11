@@ -4,7 +4,7 @@ import "github.com/luis12loureiro/neurun/internal/task/domain"
 
 type Service interface {
 	Create(t domain.Task) error
-	GetTask(id string) (domain.Task, error)
+	Get(id string) (domain.Task, error)
 }
 
 type service struct {
@@ -19,6 +19,6 @@ func (s *service) Create(t domain.Task) error {
 	return s.r.Create(t)
 }
 
-func (s *service) GetTask(id string) (domain.Task, error) {
-	return s.r.GetTask(id)
+func (s *service) Get(id string) (domain.Task, error) {
+	return s.r.Get(id)
 }

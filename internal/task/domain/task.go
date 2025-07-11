@@ -40,7 +40,7 @@ type TaskResult struct {
 
 type Repository interface {
 	Create(t Task) error
-	GetTask(id string) (Task, error)
+	Get(id string) (Task, error)
 }
 
 func (t *Task) Execute() (*TaskResult, error) {

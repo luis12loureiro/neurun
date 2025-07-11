@@ -30,7 +30,7 @@ func (r *JSONRepo) Create(t domain.Task) error {
 	return encoder.Encode(t)
 }
 
-func (r *JSONRepo) GetTask(id string) (domain.Task, error) {
+func (r *JSONRepo) Get(id string) (domain.Task, error) {
 	var task domain.Task
 
 	filePath := filepath.Join(r.path, r.filename)

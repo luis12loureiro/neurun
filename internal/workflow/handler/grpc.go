@@ -23,3 +23,7 @@ func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest
 	h.s.Create(domain.Worklow{Id: "123", Name: "workflow1"})
 	return &pb.WorkflowResponse{Id: "123", Name: in.GetName()}, nil
 }
+
+func (h *handler) GetWorkflow(_ context.Context, in *pb.GetWorkflowRequest) (*pb.WorkflowResponse, error) {
+	return &pb.WorkflowResponse{Id: "123", Name: "test123"}, nil
+}
