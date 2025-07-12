@@ -20,6 +20,6 @@ func NewServer(s task.Service) pb.WorkflowServiceServer {
 
 func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest) (*pb.WorkflowResponse, error) {
 	fmt.Printf("Received: %v", in.GetName())
-	h.s.Create(domain.Task{Id: "123", Name: "task1", Type: "log", Delay: 2})
+	h.s.Create(domain.Task{ID: "123", Name: "task1", Type: "log", Delay: 2})
 	return &pb.WorkflowResponse{Id: "123", Name: in.GetName()}, nil
 }

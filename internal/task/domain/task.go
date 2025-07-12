@@ -14,7 +14,7 @@ const (
 )
 
 type Task struct {
-	Id        string
+	ID        string
 	Name      string
 	Type      TaskType
 	Retries   uint8
@@ -32,7 +32,7 @@ const (
 )
 
 type TaskResult struct {
-	TaskId  string
+	TaskID  string
 	Status  ResultStatus
 	Output  map[string][]interface{}
 	Message string
@@ -53,7 +53,7 @@ func (t *Task) Execute() (*TaskResult, error) {
 	}
 
 	r := TaskResult{
-		TaskId: t.Id,
+		TaskID: t.ID,
 		Status: Ok,
 	}
 
@@ -76,5 +76,5 @@ func (t *Task) Execute() (*TaskResult, error) {
 }
 
 func (t *Task) String() string {
-	return fmt.Sprintf("Id %s, Name %s, Type %s", t.Id, t.Name, t.Type)
+	return fmt.Sprintf("Id %s, Name %s, Type %s", t.ID, t.Name, t.Type)
 }

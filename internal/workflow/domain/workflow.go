@@ -8,7 +8,7 @@ import (
 )
 
 type Worklow struct {
-	Id          string
+	ID          string
 	Name        string
 	Description string
 	Tasks       []domain.Task
@@ -22,5 +22,5 @@ type Repository interface {
 }
 
 func (w *Worklow) String() string {
-	return fmt.Sprintf("Id %s, Name %s", w.Id, w.Name)
+	return fmt.Sprintf("Id %s, Name %s", w.ID, w.Name)
 }
