@@ -14,7 +14,7 @@ type JSONRepo struct {
 	filename string
 }
 
-func NewJSONRepository(path string, filename string) domain.Repository {
+func NewJSONRepository(path string, filename string) domain.WorkflowRepository {
 	return &JSONRepo{path: path, filename: filename}
 }
 

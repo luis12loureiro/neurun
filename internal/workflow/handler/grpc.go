@@ -2,8 +2,8 @@ package handler
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/google/uuid"
 	pb "github.com/luis12loureiro/neurun/api/gen"
 	"github.com/luis12loureiro/neurun/internal/workflow"
 	"github.com/luis12loureiro/neurun/internal/workflow/domain"
@@ -19,8 +19,14 @@ func NewServer(s workflow.Service) pb.WorkflowServiceServer {
 }
 
 func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest) (*pb.WorkflowResponse, error) {
-	fmt.Printf("Received: %v", in.GetName())
-	h.s.Create(domain.Worklow{ID: "123", Name: "workflow1"})
+	err := h.s.Create(domain.Worklow{
+		ID:          uuid.NewString(),
+		Name:        in.Name,
+		Description: *in.Description,
+	})
+	if err != nil {
+		return nil, err
+	}
 	return &pb.WorkflowResponse{Id: "123", Name: in.GetName()}, nil
 }
 

@@ -8,10 +8,10 @@ type Service interface {
 }
 
 type service struct {
-	r domain.Repository
+	r domain.WorkflowRepository
 }
 
-func NewService(r domain.Repository) Service {
+func NewService(r domain.WorkflowRepository) Service {
 	return &service{r}
 }
 
