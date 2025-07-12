@@ -6,27 +6,13 @@ option go_package = "github.com/luis12loureiro/neurun/api/gen/neurun";
 
 import "google/protobuf/duration.proto";
 import "google/protobuf/struct.proto";
+import "common.proto";
+
 
 service WorkflowService {
     rpc CreateWorkflow(CreateWorkflowRequest) returns (WorkflowResponse);
     rpc GetWorkflow(GetWorkflowRequest) returns (WorkflowResponse);
-    rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (WorkflowResponse);
-}
-
-enum TaskType {
-  UNSPECIFIED = 0;
-  LOG = 1;
-  HTTP = 2;
-}
-
-message Task {
-    TaskType type = 1;
-    string name = 2;
-    uint32 retries = 3;
-    google.protobuf.Duration delay = 4;
-    optional string condition = 5;
-    google.protobuf.Struct payload = 6;
-    optional Task next = 7;
+    //rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (WorkflowResponse);
 }
 
 message CreateWorkflowRequest {
@@ -35,12 +21,12 @@ message CreateWorkflowRequest {
     repeated Task tasks = 3;
 }
 
-message ExecuteWorkflowRequest {
-    string workflowId = 1;
+message GetWorkflowRequest {
+    string id = 1;
 }
 
-message GetWorkflowRequest {
-    string workflow_id = 1;
+message ExecuteWorkflowRequest {
+    string id = 1;
 }
 
 message WorkflowResponse {
