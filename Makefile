@@ -16,6 +16,7 @@ lint: fmt
 .PHONY:lint
 
 vet: fmt
+	@echo "Vetting Go code..."
 	go vet ./...
 .PHONY:vet
 
