@@ -15,7 +15,11 @@ lint: fmt
 	golint ./...
 .PHONY:lint
 
-build: lint
+vet: fmt
+	go vet ./...
+.PHONY:vet
+
+build: vet
 	@echo "Building application..."
 	go build -o bin/neurun ./cmd/main.go
 .PHONY:build
