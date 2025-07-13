@@ -2,16 +2,24 @@ package domain
 
 import (
 	"fmt"
-	"time"
+)
+
+type WorklowStatus string
+
+const (
+	WorkflowStatusIDLE      WorklowStatus = "IDLE"
+	WorkflowStatusRunning   WorklowStatus = "RUNNING"
+	WorkflowStatusCompleted WorklowStatus = "COMPLETED"
+	WorkflowStatusFailed    WorklowStatus = "FAILED"
+	// add more in the future...
 )
 
 type Worklow struct {
 	ID          string
 	Name        string
 	Description string
+	Status      WorklowStatus
 	Tasks       []Task
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
 }
 
 type WorkflowRepository interface {

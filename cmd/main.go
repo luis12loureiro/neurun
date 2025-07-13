@@ -26,7 +26,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	repo := wr.NewJSONRepository("", "")
+	repo := wr.NewJSONRepository("../internal/workflow/repository/storage", "data.json")
 	svc := ws.NewService(repo)
 	handler := wh.NewServer(svc)
 	pb.RegisterWorkflowServiceServer(s, handler)

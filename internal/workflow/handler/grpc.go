@@ -19,17 +19,33 @@ func NewServer(s workflow.Service) pb.WorkflowServiceServer {
 }
 
 func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest) (*pb.WorkflowResponse, error) {
+	var tasks []domain.Task
+	for _, t := range in.Tasks {
+		task, err := TaskFromProto(t)
+		if err != nil {
+			return nil, err
+		}
+		task.ID = uuid.NewString()
+		tasks = append(tasks, task)
+	}
+	id := uuid.NewString()
 	err := h.s.Create(domain.Worklow{
-		ID:          uuid.NewString(),
-		Name:        in.Name,
-		Description: *in.Description,
+		ID:          id,
+		Name:        in.GetName(),
+		Description: in.GetDescription(),
+		Status:      domain.WorkflowStatusIDLE,
+		Tasks:       tasks,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &pb.WorkflowResponse{Id: "123", Name: in.GetName()}, nil
+	return &pb.WorkflowResponse{Id: id, Name: in.GetName()}, nil
 }
 
 func (h *handler) GetWorkflow(_ context.Context, in *pb.GetWorkflowRequest) (*pb.WorkflowResponse, error) {
-	return &pb.WorkflowResponse{Id: "123", Name: "test123"}, nil
+	wf, err := h.s.Get(in.GetId())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.WorkflowResponse{Id: wf.ID, Name: wf.Name, Description: wf.Description, Status: string(wf.Status)}, nil
 }

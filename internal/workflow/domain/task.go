@@ -8,18 +8,19 @@ import (
 type TaskType string
 
 const (
-	TaskTypeLog  TaskType = "log"
-	TaskTypeHTTP TaskType = "http"
+	TaskTypeUnspecified TaskType = "UNSPECIFIED"
+	TaskTypeLog         TaskType = "LOG"
+	TaskTypeHTTP        TaskType = "HTTP"
 	// add more in the future...
 )
 
 type TaskStatus string
 
 const (
-	TaskStatusPending   TaskStatus = "pending"
-	TaskStatusRunning   TaskStatus = "running"
-	TaskStatusCompleted TaskStatus = "completed"
-	TaskStatusFailed    TaskStatus = "failed"
+	TaskStatusPending   TaskStatus = "PENDING"
+	TaskStatusRunning   TaskStatus = "RUNNING"
+	TaskStatusCompleted TaskStatus = "COMPLETED"
+	TaskStatusFailed    TaskStatus = "FAILED"
 	// add more in the future...
 )
 
@@ -32,7 +33,7 @@ type Task struct {
 	Delay     time.Duration
 	Condition string
 	Payload   map[string]interface{}
-	Next      []string
+	Next      []Task
 }
 
 type TaskRepository interface {

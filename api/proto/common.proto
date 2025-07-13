@@ -13,12 +13,22 @@ enum TaskType {
   HTTP = 2;
 }
 
+enum TaskStatus {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_PENDING = 1;
+  STATUS_RUNNNING = 2;
+  STATUS_COMPLETED = 3;
+  STATUS_FAILED = 4;
+}
+
 message Task {
-    TaskType type = 1;
-    string name = 2;
-    uint32 retries = 3;
-    google.protobuf.Duration delay = 4;
-    optional string condition = 5;
-    google.protobuf.Struct payload = 6;
-    optional Task next = 7;
+  optional string id = 1;
+  string name = 2;
+  TaskType type = 3;
+  TaskStatus status = 4;
+  uint32 retries = 5;
+  google.protobuf.Duration delay = 6;
+  optional string condition = 7;
+  google.protobuf.Struct payload = 8;
+  repeated Task next = 9;
 }

@@ -4,8 +4,6 @@ package neurun;
 
 option go_package = "github.com/luis12loureiro/neurun/api/gen/neurun";
 
-import "google/protobuf/duration.proto";
-import "google/protobuf/struct.proto";
 import "common.proto";
 
 
@@ -25,11 +23,10 @@ message GetWorkflowRequest {
     string id = 1;
 }
 
-message ExecuteWorkflowRequest {
-    string id = 1;
-}
-
 message WorkflowResponse {
     string id = 1;
     string name = 2;
+    string description = 3;
+    string status = 4;
+    repeated Task tasks = 5;
 }
