@@ -11,7 +11,6 @@ import (
 	wh "github.com/luis12loureiro/neurun/internal/workflow/handler"
 	wr "github.com/luis12loureiro/neurun/internal/workflow/repository"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 var (
@@ -26,11 +25,10 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	repo := wr.NewJSONRepository("../internal/workflow/repository/storage", "data.json")
+	repo := wr.NewJSONRepository("./internal/workflow/repository/storage", "data.json")
 	svc := ws.NewService(repo)
 	handler := wh.NewServer(svc)
 	pb.RegisterWorkflowServiceServer(s, handler)
-	reflection.Register(s) // remove in production !!!!
 
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
