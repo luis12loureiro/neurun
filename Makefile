@@ -22,5 +22,5 @@ vet: fmt
 
 build: vet
 	@echo "Building application..."
-	go build -o bin/neurun ./cmd/main.go
+	go build -o bin/neurun ./main.go
 .PHONY:build
