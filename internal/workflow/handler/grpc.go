@@ -47,5 +47,15 @@ func (h *handler) GetWorkflow(_ context.Context, in *pb.GetWorkflowRequest) (*pb
 	if err != nil {
 		return nil, err
 	}
-	return &pb.WorkflowResponse{Id: wf.ID, Name: wf.Name, Description: wf.Description, Status: string(wf.Status)}, nil
+	tasks := make([]*pb.Task, len(wf.Tasks))
+	for i, t := range wf.Tasks {
+		tasks[i] = TaskToProto(t)
+	}
+	return &pb.WorkflowResponse{
+		Id:          wf.ID,
+		Name:        wf.Name,
+		Description: wf.Description,
+		Status:      string(wf.Status),
+		Tasks:       tasks,
+	}, nil
 }
