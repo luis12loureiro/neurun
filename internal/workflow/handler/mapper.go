@@ -11,8 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func TaskFromProto(pbTask *pb.Task) (domain.Task, error) {
-
+func TaskFromProto(pbTask *pb.CreateTaskRequest) (domain.Task, error) {
 	if pbTask.GetRetries() > math.MaxUint8 {
 		return domain.Task{}, fmt.Errorf("retries too large to fit in uint8")
 	}
@@ -21,44 +20,27 @@ func TaskFromProto(pbTask *pb.Task) (domain.Task, error) {
 		return domain.Task{}, err
 	}
 	return domain.Task{
-		Name:      pbTask.GetName(),
-		Type:      convertTaskTypeFromProto(pbTask.GetType()),
-		Status:    convertTaskStatusFromProto(pbTask.GetStatus()),
-		Retries:   uint8(pbTask.GetRetries()),
-		Delay:     pbTask.GetDelay().AsDuration(),
-		Condition: pbTask.GetCondition(),
-		Payload:   convertStructToMap(pbTask.GetPayload()),
-		Next:      next,
+		Name:       pbTask.GetName(),
+		Type:       convertTaskTypeFromProto(pbTask.GetType()),
+		Retries:    uint8(pbTask.GetRetries()),
+		RetryDelay: pbTask.GetRetryDelay().AsDuration(),
+		Condition:  pbTask.GetCondition(),
+		Payload:    convertStructToMap(pbTask.GetPayload()),
+		Next:       next,
 	}, nil
 }
 
 func TaskToProto(t domain.Task) *pb.Task {
 	return &pb.Task{
-		Name:      t.Name,
-		Type:      convertTaskTypeToProto(t.Type),
-		Status:    convertTaskStatusToProto(t.Status),
-		Retries:   uint32(t.Retries),
-		Delay:     durationpb.New(t.Delay),
-		Condition: &t.Condition,
-		Payload:   convertMapToStruct(t.Payload),
-		Next:      convertNextToProto(t.Next),
-	}
-}
-
-func convertTaskStatusFromProto(s pb.TaskStatus) domain.TaskStatus {
-	switch s {
-	case pb.TaskStatus_STATUS_UNSPECIFIED:
-		return domain.TaskStatusPending
-	case pb.TaskStatus_STATUS_PENDING:
-		return domain.TaskStatusPending
-	case pb.TaskStatus_STATUS_RUNNNING:
-		return domain.TaskStatusRunning
-	case pb.TaskStatus_STATUS_COMPLETED:
-		return domain.TaskStatusCompleted
-	case pb.TaskStatus_STATUS_FAILED:
-		return domain.TaskStatusFailed
-	default:
-		return domain.TaskStatusPending
+		Id:         &t.ID,
+		Name:       t.Name,
+		Type:       convertTaskTypeToProto(t.Type),
+		Status:     convertTaskStatusToProto(t.Status),
+		Retries:    uint32(t.Retries),
+		RetryDelay: durationpb.New(t.RetryDelay),
+		Condition:  &t.Condition,
+		Payload:    convertMapToStruct(t.Payload),
+		Next:       convertNextToProto(t.Next),
 	}
 }
 
@@ -95,17 +77,20 @@ func convertMapToStruct(m map[string]interface{}) *structpb.Struct {
 	return out
 }
 
-func convertNextFromProto(pbNext []*pb.Task) ([]domain.Task, error) {
+func convertNextFromProto(pbNext []*pb.CreateTaskRequest) ([]domain.Task, error) {
 	if len(pbNext) == 0 {
 		return []domain.Task{}, nil
 	}
-	out := make([]domain.Task, len(pbNext))
-	for i, t := range pbNext {
+	var out []domain.Task
+	for _, t := range pbNext {
+		if t == nil || t.GetName() == "" {
+			continue
+		}
 		from, err := TaskFromProto(t)
 		if err != nil {
-			return []domain.Task{}, nil
+			return nil, err
 		}
-		out[i] = from
+		out = append(out, from)
 	}
 	return out, nil
 }

@@ -25,7 +25,7 @@ func NewJSONRepository(path string, filename string) domain.WorkflowRepository {
 
 func (r *JSONRepo) Create(t domain.Worklow) error {
 	filePath := filepath.Join(r.path, r.filename)
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, FilePermUserReadWriteGroupRead)
 	if err != nil {
 		return fmt.Errorf("failed to read workflow file: %w", err)
 	}

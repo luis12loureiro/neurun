@@ -25,15 +25,15 @@ const (
 )
 
 type Task struct {
-	ID        string
-	Name      string
-	Type      TaskType
-	Status    TaskStatus
-	Retries   uint8
-	Delay     time.Duration
-	Condition string
-	Payload   map[string]interface{}
-	Next      []Task
+	ID         string
+	Name       string
+	Type       TaskType
+	Status     TaskStatus
+	Retries    uint8
+	RetryDelay time.Duration
+	Condition  string
+	Payload    map[string]interface{}
+	Next       []Task
 }
 
 type TaskRepository interface {

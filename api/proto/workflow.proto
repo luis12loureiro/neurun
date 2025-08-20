@@ -16,7 +16,7 @@ service WorkflowService {
 message CreateWorkflowRequest {
     string name = 1;
     optional string description = 2;
-    repeated Task tasks = 3;
+    repeated CreateTaskRequest tasks = 3;
 }
 
 message GetWorkflowRequest {

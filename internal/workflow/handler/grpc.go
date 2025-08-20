@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 
-	"github.com/google/uuid"
 	pb "github.com/luis12loureiro/neurun/api/gen"
 	"github.com/luis12loureiro/neurun/internal/workflow"
 	"github.com/luis12loureiro/neurun/internal/workflow/domain"
@@ -25,21 +24,23 @@ func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest
 		if err != nil {
 			return nil, err
 		}
-		task.ID = uuid.NewString()
 		tasks = append(tasks, task)
 	}
-	id := uuid.NewString()
-	err := h.s.Create(domain.Worklow{
-		ID:          id,
+	w, err := h.s.Create(domain.Worklow{
 		Name:        in.GetName(),
 		Description: in.GetDescription(),
-		Status:      domain.WorkflowStatusIDLE,
 		Tasks:       tasks,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &pb.WorkflowResponse{Id: id, Name: in.GetName()}, nil
+	return &pb.WorkflowResponse{
+		Id:          w.ID,
+		Name:        w.Name,
+		Description: w.Description,
+		Status:      string(w.Status),
+		Tasks:       convertNextToProto(w.Tasks),
+	}, nil
 }
 
 func (h *handler) GetWorkflow(_ context.Context, in *pb.GetWorkflowRequest) (*pb.WorkflowResponse, error) {

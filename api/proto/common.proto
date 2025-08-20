@@ -21,13 +21,23 @@ enum TaskStatus {
   STATUS_FAILED = 4;
 }
 
+message CreateTaskRequest {
+  string name = 1;
+  TaskType type = 2;
+  uint32 retries = 3;
+  google.protobuf.Duration retryDelay = 4;
+  optional string condition = 5;
+  google.protobuf.Struct payload = 6;
+  repeated CreateTaskRequest next = 7;
+}
+
 message Task {
   optional string id = 1;
   string name = 2;
   TaskType type = 3;
   TaskStatus status = 4;
   uint32 retries = 5;
-  google.protobuf.Duration delay = 6;
+  google.protobuf.Duration retryDelay = 6;
   optional string condition = 7;
   google.protobuf.Struct payload = 8;
   repeated Task next = 9;
