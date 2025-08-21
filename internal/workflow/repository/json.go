@@ -23,7 +23,7 @@ func NewJSONRepository(path string, filename string) domain.WorkflowRepository {
 	return &JSONRepo{path: path, filename: filename}
 }
 
-func (r *JSONRepo) Create(t domain.Worklow) error {
+func (r *JSONRepo) Create(t *domain.Worklow) error {
 	filePath := filepath.Join(r.path, r.filename)
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, FilePermUserReadWriteGroupRead)
 	if err != nil {
@@ -37,23 +37,23 @@ func (r *JSONRepo) Create(t domain.Worklow) error {
 	return nil
 }
 
-func (r *JSONRepo) Get(id string) (domain.Worklow, error) {
+func (r *JSONRepo) Get(id string) (*domain.Worklow, error) {
 	var w domain.Worklow
 	filePath := filepath.Join(r.path, r.filename)
 	file, err := os.Open(filePath)
 	if err != nil {
-		return w, fmt.Errorf("failed to open file: %w", err)
+		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
 	defer file.Close()
 
 	dec := json.NewDecoder(file)
 	for dec.More() {
 		if err := dec.Decode(&w); err != nil {
-			return w, fmt.Errorf("failed to decode workflow: %w", err)
+			return nil, fmt.Errorf("failed to decode workflow: %w", err)
 		}
 		if w.ID == id {
-			return w, nil
+			return &w, nil
 		}
 	}
-	return w, fmt.Errorf("workflow with id %s not found", id)
+	return nil, fmt.Errorf("workflow with id %s not found", id)
 }

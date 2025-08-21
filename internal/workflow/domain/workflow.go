@@ -2,6 +2,8 @@ package domain
 
 import (
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type WorklowStatus string
@@ -19,12 +21,28 @@ type Worklow struct {
 	Name        string
 	Description string
 	Status      WorklowStatus
-	Tasks       []Task
+	Tasks       []*Task
 }
 
 type WorkflowRepository interface {
-	Create(w Worklow) error
-	Get(id string) (Worklow, error)
+	Create(w *Worklow) error
+	Get(id string) (*Worklow, error)
+}
+
+func NewWorkflow(name string, description string, tasks []*Task) (*Worklow, error) {
+	if name == "" {
+		return nil, fmt.Errorf("name cannot be empty")
+	}
+	if len(tasks) > 10 {
+		return nil, fmt.Errorf("cannot have more than 10 tasks")
+	}
+	return &Worklow{
+		ID:          uuid.NewString(),
+		Name:        name,
+		Description: description,
+		Status:      WorkflowStatusIDLE,
+		Tasks:       tasks,
+	}, nil
 }
 
 func (w *Worklow) String() string {

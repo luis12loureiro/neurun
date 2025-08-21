@@ -18,7 +18,7 @@ func NewServer(s workflow.Service) pb.WorkflowServiceServer {
 }
 
 func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest) (*pb.WorkflowResponse, error) {
-	var tasks []domain.Task
+	var tasks []*domain.Task
 	for _, t := range in.Tasks {
 		task, err := TaskFromProto(t)
 		if err != nil {
@@ -26,20 +26,20 @@ func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest
 		}
 		tasks = append(tasks, task)
 	}
-	w, err := h.s.Create(domain.Worklow{
-		Name:        in.GetName(),
-		Description: in.GetDescription(),
-		Tasks:       tasks,
-	})
+	w, err := domain.NewWorkflow(in.GetName(), in.GetDescription(), tasks)
+	if err != nil {
+		return nil, err
+	}
+	wf, err := h.s.Create(w)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.WorkflowResponse{
-		Id:          w.ID,
-		Name:        w.Name,
-		Description: w.Description,
-		Status:      string(w.Status),
-		Tasks:       convertNextToProto(w.Tasks),
+		Id:          wf.ID,
+		Name:        wf.Name,
+		Description: wf.Description,
+		Status:      string(wf.Status),
+		Tasks:       convertNextToProto(wf.Tasks),
 	}, nil
 }
 

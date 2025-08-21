@@ -36,3 +36,6 @@ api/gen/**/*.pb.go
 # Editor/IDE
 .idea/
 .vscode/
+
+# backlog file
+backlog.md

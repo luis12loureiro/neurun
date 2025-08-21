@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"fmt"
-	"math"
-
 	"github.com/luis12loureiro/neurun/internal/workflow/domain"
 
 	pb "github.com/luis12loureiro/neurun/api/gen"
@@ -11,26 +8,27 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func TaskFromProto(pbTask *pb.CreateTaskRequest) (domain.Task, error) {
-	if pbTask.GetRetries() > math.MaxUint8 {
-		return domain.Task{}, fmt.Errorf("retries too large to fit in uint8")
-	}
+func TaskFromProto(pbTask *pb.CreateTaskRequest) (*domain.Task, error) {
 	next, err := convertNextFromProto(pbTask.GetNext())
 	if err != nil {
-		return domain.Task{}, err
+		return nil, err
 	}
-	return domain.Task{
-		Name:       pbTask.GetName(),
-		Type:       convertTaskTypeFromProto(pbTask.GetType()),
-		Retries:    uint8(pbTask.GetRetries()),
-		RetryDelay: pbTask.GetRetryDelay().AsDuration(),
-		Condition:  pbTask.GetCondition(),
-		Payload:    convertStructToMap(pbTask.GetPayload()),
-		Next:       next,
-	}, nil
+	task, err := domain.NewTask(
+		pbTask.GetName(),
+		convertTaskTypeFromProto(pbTask.GetType()),
+		pbTask.GetRetries(),
+		pbTask.GetRetryDelay().AsDuration(),
+		pbTask.GetCondition(),
+		convertStructToMap(pbTask.GetPayload()),
+		next,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
 }
 
-func TaskToProto(t domain.Task) *pb.Task {
+func TaskToProto(t *domain.Task) *pb.Task {
 	return &pb.Task{
 		Id:         &t.ID,
 		Name:       t.Name,
@@ -77,11 +75,11 @@ func convertMapToStruct(m map[string]interface{}) *structpb.Struct {
 	return out
 }
 
-func convertNextFromProto(pbNext []*pb.CreateTaskRequest) ([]domain.Task, error) {
+func convertNextFromProto(pbNext []*pb.CreateTaskRequest) ([]*domain.Task, error) {
 	if len(pbNext) == 0 {
-		return []domain.Task{}, nil
+		return []*domain.Task{}, nil
 	}
-	var out []domain.Task
+	var out []*domain.Task
 	for _, t := range pbNext {
 		if t == nil || t.GetName() == "" {
 			continue
@@ -95,8 +93,9 @@ func convertNextFromProto(pbNext []*pb.CreateTaskRequest) ([]domain.Task, error)
 	return out, nil
 }
 
-func convertNextToProto(t []domain.Task) []*pb.Task {
+func convertNextToProto(t []*domain.Task) []*pb.Task {
 	if len(t) == 0 {
+		// protobuf reads nil as empty slice and retuns an emtpy array
 		return nil
 	}
 	out := make([]*pb.Task, len(t))
