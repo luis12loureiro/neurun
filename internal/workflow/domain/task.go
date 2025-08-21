@@ -64,6 +64,9 @@ func NewTask(
 	if retryDelay < 0 {
 		return nil, fmt.Errorf("retry delay cannot be negative")
 	}
+	if payload == nil {
+		return nil, fmt.Errorf("payload cannot be nil")
+	}
 	return &Task{
 		ID:         uuid.NewString(),
 		Name:       name,
