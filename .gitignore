@@ -37,5 +37,5 @@ api/gen/**/*.pb.go
 .idea/
 .vscode/
 
-# backlog file
-backlog.md
+# storage files
+internal/workflow/repository/storage/**/*.ndjson
