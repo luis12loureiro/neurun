@@ -2,6 +2,7 @@
 
 <details>
 <summary><h3>22/08/2025</h3></summary>
+
 **Work done**\
 - Limit the task retry delay duration to only have positive values
 - Limit number of tasks in a workflow
