@@ -1,4 +1,4 @@
-# Workflow Automation Server Changelog
+# Workflow Automation Server Development Log
 
 <details>
 <summary><h3>22/08/2025</h3></summary>
