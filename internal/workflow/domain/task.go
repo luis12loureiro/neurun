@@ -35,7 +35,7 @@ type Task struct {
 	Retries    uint8
 	RetryDelay time.Duration
 	Condition  string
-	Payload    map[string]interface{}
+	Payload    Payload
 	Next       []*Task
 }
 
@@ -50,7 +50,7 @@ func NewTask(
 	retries uint32,
 	retryDelay time.Duration,
 	condition string,
-	payload map[string]interface{},
+	payload Payload,
 	next []*Task,
 ) (*Task, error) {
 	if name == "" {
@@ -66,6 +66,9 @@ func NewTask(
 	}
 	if payload == nil {
 		return nil, fmt.Errorf("payload cannot be nil")
+	}
+	if payload.Type() != taskType {
+		return nil, fmt.Errorf("payload type does not match task type")
 	}
 	return &Task{
 		ID:         uuid.NewString(),

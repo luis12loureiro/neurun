@@ -4,7 +4,7 @@ package neurun;
 
 option go_package = "github.com/luis12loureiro/neurun/api/gen/neurun";
 
-import "common.proto";
+import "task.proto";
 
 
 service WorkflowService {

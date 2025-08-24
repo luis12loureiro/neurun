@@ -5,7 +5,6 @@ import (
 
 	pb "github.com/luis12loureiro/neurun/api/gen"
 	"google.golang.org/protobuf/types/known/durationpb"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func TaskFromProto(pbTask *pb.CreateTaskRequest) (*domain.Task, error) {
@@ -13,13 +12,28 @@ func TaskFromProto(pbTask *pb.CreateTaskRequest) (*domain.Task, error) {
 	if err != nil {
 		return nil, err
 	}
+	var payload domain.Payload
+	switch pbTask.GetPayload().(type) {
+	case *pb.CreateTaskRequest_LogPayload:
+		payload = &domain.LogPayload{
+			Message: pbTask.GetLogPayload().GetMessage(),
+		}
+	case *pb.CreateTaskRequest_HttpPayload:
+		payload = &domain.HTTPPayload{
+			URL:     pbTask.GetHttpPayload().GetUrl(),
+			Method:  pbTask.GetHttpPayload().GetMethod(),
+			Body:    pbTask.GetHttpPayload().GetBody(),
+			Headers: pbTask.GetHttpPayload().GetHeaders(),
+			//Auth:    pbTask.GetHttpPayload().GetAuth(),
+		}
+	}
 	task, err := domain.NewTask(
 		pbTask.GetName(),
 		convertTaskTypeFromProto(pbTask.GetType()),
 		pbTask.GetRetries(),
 		pbTask.GetRetryDelay().AsDuration(),
 		pbTask.GetCondition(),
-		convertStructToMap(pbTask.GetPayload()),
+		payload,
 		next,
 	)
 	if err != nil {
@@ -29,16 +43,53 @@ func TaskFromProto(pbTask *pb.CreateTaskRequest) (*domain.Task, error) {
 }
 
 func TaskToProto(t *domain.Task) *pb.Task {
-	return &pb.Task{
-		Id:         &t.ID,
-		Name:       t.Name,
-		Type:       convertTaskTypeToProto(t.Type),
-		Status:     convertTaskStatusToProto(t.Status),
-		Retries:    uint32(t.Retries),
-		RetryDelay: durationpb.New(t.RetryDelay),
-		Condition:  &t.Condition,
-		Payload:    convertMapToStruct(t.Payload),
-		Next:       convertNextToProto(t.Next),
+	switch p := t.Payload.(type) {
+	case *domain.LogPayload:
+		return &pb.Task{
+			Id:         &t.ID,
+			Name:       t.Name,
+			Type:       convertTaskTypeToProto(t.Type),
+			Status:     convertTaskStatusToProto(t.Status),
+			Retries:    uint32(t.Retries),
+			RetryDelay: durationpb.New(t.RetryDelay),
+			Condition:  &t.Condition,
+			Payload: &pb.Task_LogPayload{
+				LogPayload: &pb.LogPayload{
+					Message: p.Message,
+				},
+			},
+			Next: convertNextToProto(t.Next),
+		}
+	case *domain.HTTPPayload:
+		return &pb.Task{
+			Id:         &t.ID,
+			Name:       t.Name,
+			Type:       convertTaskTypeToProto(t.Type),
+			Status:     convertTaskStatusToProto(t.Status),
+			Retries:    uint32(t.Retries),
+			RetryDelay: durationpb.New(t.RetryDelay),
+			Condition:  &t.Condition,
+			Payload: &pb.Task_HttpPayload{
+				HttpPayload: &pb.HTTPPayload{
+					Url:     p.URL,
+					Method:  p.Method,
+					Body:    p.Body,
+					Headers: p.Headers,
+				},
+			},
+			Next: convertNextToProto(t.Next),
+		}
+	default:
+		return &pb.Task{
+			Id:         &t.ID,
+			Name:       t.Name,
+			Type:       convertTaskTypeToProto(t.Type),
+			Status:     convertTaskStatusToProto(t.Status),
+			Retries:    uint32(t.Retries),
+			RetryDelay: durationpb.New(t.RetryDelay),
+			Condition:  &t.Condition,
+			Next:       convertNextToProto(t.Next),
+		}
 	}
 }
 
@@ -47,7 +98,7 @@ func convertTaskStatusToProto(s domain.TaskStatus) pb.TaskStatus {
 	case domain.TaskStatusPending:
 		return pb.TaskStatus_STATUS_PENDING
 	case domain.TaskStatusRunning:
-		return pb.TaskStatus_STATUS_RUNNNING
+		return pb.TaskStatus_STATUS_RUNNING
 	case domain.TaskStatusCompleted:
 		return pb.TaskStatus_STATUS_COMPLETED
 	case domain.TaskStatusFailed:
@@ -55,24 +106,6 @@ func convertTaskStatusToProto(s domain.TaskStatus) pb.TaskStatus {
 	default:
 		return pb.TaskStatus_STATUS_PENDING
 	}
-}
-
-func convertStructToMap(s *structpb.Struct) map[string]interface{} {
-	if s == nil {
-		return nil
-	}
-	return s.AsMap()
-}
-
-func convertMapToStruct(m map[string]interface{}) *structpb.Struct {
-	if m == nil {
-		return nil
-	}
-	out, err := structpb.NewStruct(m)
-	if err != nil {
-		return nil
-	}
-	return out
 }
 
 func convertNextFromProto(pbNext []*pb.CreateTaskRequest) ([]*domain.Task, error) {

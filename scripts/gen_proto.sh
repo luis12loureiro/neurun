@@ -9,5 +9,5 @@ protoc \
   --go-grpc_out="${ROOT_DIR}/api/gen" \
   --go_opt=paths=source_relative \
   --go-grpc_opt=paths=source_relative \
-  "${ROOT_DIR}/api/proto/common.proto" \
+  "${ROOT_DIR}/api/proto/task.proto" \
   "${ROOT_DIR}/api/proto/workflow.proto"

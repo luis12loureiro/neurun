@@ -5,7 +5,6 @@ package neurun;
 option go_package = "github.com/luis12loureiro/neurun/api/gen/neurun";
 
 import "google/protobuf/duration.proto";
-import "google/protobuf/struct.proto";
 
 enum TaskType {
   UNSPECIFIED = 0;
@@ -16,7 +15,7 @@ enum TaskType {
 enum TaskStatus {
   STATUS_UNSPECIFIED = 0;
   STATUS_PENDING = 1;
-  STATUS_RUNNNING = 2;
+  STATUS_RUNNING = 2;
   STATUS_COMPLETED = 3;
   STATUS_FAILED = 4;
 }
@@ -27,8 +26,11 @@ message CreateTaskRequest {
   uint32 retries = 3;
   google.protobuf.Duration retryDelay = 4;
   optional string condition = 5;
-  google.protobuf.Struct payload = 6;
-  repeated CreateTaskRequest next = 7;
+  oneof payload {
+    LogPayload logPayload = 6;
+    HTTPPayload httpPayload = 7;
+  }
+  repeated CreateTaskRequest next = 8;
 }
 
 message Task {
@@ -39,6 +41,23 @@ message Task {
   uint32 retries = 5;
   google.protobuf.Duration retryDelay = 6;
   optional string condition = 7;
-  google.protobuf.Struct payload = 8;
-  repeated Task next = 9;
+  oneof payload {
+    LogPayload logPayload = 8;
+    HTTPPayload httpPayload = 9;
+  }
+  repeated Task next = 10;
 }
+
+message LogPayload {
+  string message = 1;
+}
+
+message HTTPPayload {
+  string url = 1;
+  string method = 2;
+  string body = 3;
+  map<string, string> headers = 4;
+  //HTTPAuth auth = 5;
+}
+
+
