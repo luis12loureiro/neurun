@@ -7,7 +7,6 @@
 - Limit the task retry delay duration to only have positive values
 - Limit number of tasks in a workflow
 - Add pointers to domain objects
-
 **TODO**
 - Implement HTTP and LOG type tasks payload
 - Implement task execution
