@@ -23,7 +23,7 @@ func NewJSONRepository(path string, filename string) domain.WorkflowRepository {
 	return &JSONRepo{path: path, filename: filename}
 }
 
-func (r *JSONRepo) Create(t *domain.Worklow) error {
+func (r *JSONRepo) Create(t *domain.Workflow) error {
 	filePath := filepath.Join(r.path, r.filename)
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, FilePermUserReadWriteGroupRead)
 	if err != nil {
@@ -37,8 +37,8 @@ func (r *JSONRepo) Create(t *domain.Worklow) error {
 	return nil
 }
 
-func (r *JSONRepo) Get(id string) (*domain.Worklow, error) {
-	var w domain.Worklow
+func (r *JSONRepo) Get(id string) (*domain.Workflow, error) {
+	var w domain.Workflow
 	filePath := filepath.Join(r.path, r.filename)
 	file, err := os.Open(filePath)
 	if err != nil {

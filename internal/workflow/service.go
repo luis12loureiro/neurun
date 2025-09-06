@@ -5,8 +5,8 @@ import (
 )
 
 type Service interface {
-	Create(w *domain.Worklow) (*domain.Worklow, error)
-	Get(id string) (*domain.Worklow, error)
+	Create(w *domain.Workflow) (*domain.Workflow, error)
+	Get(id string) (*domain.Workflow, error)
 }
 
 type service struct {
@@ -17,10 +17,10 @@ func NewService(r domain.WorkflowRepository) Service {
 	return &service{r}
 }
 
-func (s *service) Create(w *domain.Worklow) (*domain.Worklow, error) {
+func (s *service) Create(w *domain.Workflow) (*domain.Workflow, error) {
 	return w, s.r.Create(w)
 }
 
-func (s *service) Get(id string) (*domain.Worklow, error) {
+func (s *service) Get(id string) (*domain.Workflow, error) {
 	return s.r.Get(id)
 }

@@ -16,7 +16,7 @@ const (
 	// add more in the future...
 )
 
-type Worklow struct {
+type Workflow struct {
 	ID          string
 	Name        string
 	Description string
@@ -25,18 +25,18 @@ type Worklow struct {
 }
 
 type WorkflowRepository interface {
-	Create(w *Worklow) error
-	Get(id string) (*Worklow, error)
+	Create(w *Workflow) error
+	Get(id string) (*Workflow, error)
 }
 
-func NewWorkflow(name string, description string, tasks []*Task) (*Worklow, error) {
+func NewWorkflow(name string, description string, tasks []*Task) (*Workflow, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name cannot be empty")
 	}
 	if len(tasks) > 10 {
 		return nil, fmt.Errorf("cannot have more than 10 tasks")
 	}
-	return &Worklow{
+	return &Workflow{
 		ID:          uuid.NewString(),
 		Name:        name,
 		Description: description,
@@ -45,6 +45,6 @@ func NewWorkflow(name string, description string, tasks []*Task) (*Worklow, erro
 	}, nil
 }
 
-func (w *Worklow) String() string {
+func (w *Workflow) String() string {
 	return fmt.Sprintf("Id %s, Name %s", w.ID, w.Name)
 }
