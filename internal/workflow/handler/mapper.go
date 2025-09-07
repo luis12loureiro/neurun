@@ -19,13 +19,23 @@ func TaskFromProto(pbTask *pb.CreateTaskRequest) (*domain.Task, error) {
 			Message: pbTask.GetLogPayload().GetMessage(),
 		}
 	case *pb.CreateTaskRequest_HttpPayload:
-		payload = &domain.HTTPPayload{
-			URL:     pbTask.GetHttpPayload().GetUrl(),
-			Method:  pbTask.GetHttpPayload().GetMethod(),
-			Body:    pbTask.GetHttpPayload().GetBody(),
-			Headers: pbTask.GetHttpPayload().GetHeaders(),
-			//Auth:    pbTask.GetHttpPayload().GetAuth(),
+		httpPayload := pbTask.GetHttpPayload()
+		httpPayloadDomain, err := domain.NewHTTPPayload(
+			httpPayload.GetUrl(),
+			httpPayload.GetMethod(),
+			httpPayload.GetBody(),
+			httpPayload.GetHeaders(),
+			httpPayload.GetQueryParams(),
+			httpPayload.GetTimeout().AsDuration(),
+			convertHTTPAuthFromProto(httpPayload.GetAuth()),
+			httpPayload.GetFollowRedirects(),
+			httpPayload.GetVerifySSL(),
+			httpPayload.GetExpectedStatusCode(),
+		)
+		if err != nil {
+			return nil, err
 		}
+		payload = httpPayloadDomain
 	}
 	task, err := domain.NewTask(
 		pbTask.GetName(),
@@ -71,10 +81,16 @@ func TaskToProto(t *domain.Task) *pb.Task {
 			Condition:  &t.Condition,
 			Payload: &pb.Task_HttpPayload{
 				HttpPayload: &pb.HTTPPayload{
-					Url:     p.URL,
-					Method:  p.Method,
-					Body:    p.Body,
-					Headers: p.Headers,
+					Url:                p.URL,
+					Method:             p.Method,
+					Body:               p.Body,
+					Headers:            p.Headers,
+					QueryParams:        p.QueryParams,
+					Timeout:            durationpb.New(p.Timeout),
+					Auth:               convertHTTPAuthToProto(p.Auth),
+					FollowRedirects:    p.FollowRedirects,
+					VerifySSL:          p.VerifySSL,
+					ExpectedStatusCode: p.ExpectedStatusCode,
 				},
 			},
 			Next: convertNextToProto(t.Next),
@@ -161,5 +177,85 @@ func convertTaskTypeToProto(tt domain.TaskType) pb.TaskType {
 		return pb.TaskType_HTTP
 	default:
 		return pb.TaskType_UNSPECIFIED
+	}
+}
+
+func convertHTTPAuthFromProto(pbAuth *pb.HTTPAuth) domain.HTTPAuthType {
+	if pbAuth == nil {
+		return nil
+	}
+
+	switch authType := pbAuth.GetAuthType().(type) {
+	case *pb.HTTPAuth_Basic:
+		return &domain.HTTPBasicAuth{
+			Username: authType.Basic.GetUsername(),
+			Password: authType.Basic.GetPassword(),
+		}
+	case *pb.HTTPAuth_Bearer:
+		return &domain.HTTPBearerAuth{
+			Token: authType.Bearer.GetToken(),
+		}
+	case *pb.HTTPAuth_ApiKey:
+		return &domain.HTTPApiKeyAuth{
+			Key:      authType.ApiKey.GetKey(),
+			Value:    authType.ApiKey.GetValue(),
+			Location: convertHTTPApiKeyLocationFromProto(authType.ApiKey.GetLocation()),
+		}
+	default:
+		return nil
+	}
+}
+
+func convertHTTPAuthToProto(auth domain.HTTPAuthType) *pb.HTTPAuth {
+	if auth == nil {
+		return nil
+	}
+
+	pbAuth := &pb.HTTPAuth{}
+	switch authType := auth.(type) {
+	case *domain.HTTPBasicAuth:
+		pbAuth.AuthType = &pb.HTTPAuth_Basic{
+			Basic: &pb.HTTPBasicAuth{
+				Username: authType.Username,
+				Password: authType.Password,
+			},
+		}
+	case *domain.HTTPBearerAuth:
+		pbAuth.AuthType = &pb.HTTPAuth_Bearer{
+			Bearer: &pb.HTTPBearerAuth{
+				Token: authType.Token,
+			},
+		}
+	case *domain.HTTPApiKeyAuth:
+		pbAuth.AuthType = &pb.HTTPAuth_ApiKey{
+			ApiKey: &pb.HTTPApiKeyAuth{
+				Key:      authType.Key,
+				Value:    authType.Value,
+				Location: convertHTTPApiKeyLocationToProto(authType.Location),
+			},
+		}
+	}
+	return pbAuth
+}
+
+func convertHTTPApiKeyLocationFromProto(location pb.HTTPApiKeyLocation) domain.HTTPApiKeyLocation {
+	switch location {
+	case pb.HTTPApiKeyLocation_HEADER:
+		return domain.HTTPApiKeyLocationHeader
+	case pb.HTTPApiKeyLocation_QUERY:
+		return domain.HTTPApiKeyLocationQuery
+	default:
+		return domain.HTTPApiKeyLocationHeader
+	}
+}
+
+func convertHTTPApiKeyLocationToProto(location domain.HTTPApiKeyLocation) pb.HTTPApiKeyLocation {
+	switch location {
+	case domain.HTTPApiKeyLocationHeader:
+		return pb.HTTPApiKeyLocation_HEADER
+	case domain.HTTPApiKeyLocationQuery:
+		return pb.HTTPApiKeyLocation_QUERY
+	default:
+		return pb.HTTPApiKeyLocation_HEADER
 	}
 }
