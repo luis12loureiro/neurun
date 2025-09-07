@@ -24,3 +24,13 @@
 - Add authentication to HTTP payload
 - Implement task execution
 </details>
+
+<details>
+<summary><h3>08/09/2025</h3></summary>
+
+**Work done**
+- Implemented HTTP payload
+
+**TODO**
+- Implement task execution
+</details>
