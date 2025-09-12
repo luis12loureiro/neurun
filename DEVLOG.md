@@ -34,3 +34,14 @@
 **TODO**
 - Implement task execution
 </details>
+
+<details>
+<summary><h3>12/09/2025</h3></summary>
+
+**Work done**
+- Bug fixes and tested workflow, tasks and payload validations
+
+**TODO**
+- Implement task execution
+- Implement better error handling
+</details>

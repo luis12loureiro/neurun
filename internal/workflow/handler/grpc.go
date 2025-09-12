@@ -18,7 +18,7 @@ func NewServer(s workflow.Service) pb.WorkflowServiceServer {
 }
 
 func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest) (*pb.WorkflowResponse, error) {
-	var tasks []*domain.Task
+	tasks := []*domain.Task{}
 	for _, t := range in.Tasks {
 		task, err := TaskFromProto(t)
 		if err != nil {

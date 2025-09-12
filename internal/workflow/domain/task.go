@@ -2,7 +2,6 @@ package domain
 
 import (
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,6 +24,15 @@ const (
 	TaskStatusCompleted TaskStatus = "COMPLETED"
 	TaskStatusFailed    TaskStatus = "FAILED"
 	// add more in the future...
+)
+
+const (
+	TaskNameMaxLength        = 30
+	TaskDescriptionMaxLength = 100
+	TaskMaxRetries           = 5
+	TaskMaxRetryDelay        = 5 * time.Second
+	TaskMinRetryDelay        = 0 * time.Second
+	TaskMaxNextLength        = 3
 )
 
 type Task struct {
@@ -56,19 +64,26 @@ func NewTask(
 	if name == "" {
 		return nil, fmt.Errorf("name cannot be empty")
 	}
-	// retries is uint8, so we need to check if it's larger than 255
-	// the function receives uint32 on purpose
-	if retries > math.MaxUint8 {
-		return nil, fmt.Errorf("retries too large to fit in uint8")
+	if len([]rune(name)) > TaskNameMaxLength {
+		return nil, fmt.Errorf("name cannot be longer than %d characters", TaskNameMaxLength)
 	}
-	if retryDelay < 0 {
-		return nil, fmt.Errorf("retry delay cannot be negative")
+	if taskType == "" || taskType == TaskTypeUnspecified {
+		return nil, fmt.Errorf("task type cannot be empty")
+	}
+	if retries > TaskMaxRetries {
+		return nil, fmt.Errorf("retries cannot be more than %d", TaskMaxRetries)
+	}
+	if retryDelay < TaskMinRetryDelay || retryDelay > TaskMaxRetryDelay {
+		return nil, fmt.Errorf("retry delay must be between %v and %v", TaskMinRetryDelay, TaskMaxRetryDelay)
 	}
 	if payload == nil {
 		return nil, fmt.Errorf("payload cannot be nil")
 	}
 	if payload.Type() != taskType {
 		return nil, fmt.Errorf("payload type does not match task type")
+	}
+	if len(next) > TaskMaxNextLength {
+		return nil, fmt.Errorf("cannot have more than %d next tasks", TaskMaxNextLength)
 	}
 	return &Task{
 		ID:         uuid.NewString(),

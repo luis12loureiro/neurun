@@ -112,15 +112,15 @@ func TaskToProto(t *domain.Task) *pb.Task {
 func convertTaskStatusToProto(s domain.TaskStatus) pb.TaskStatus {
 	switch s {
 	case domain.TaskStatusPending:
-		return pb.TaskStatus_STATUS_PENDING
+		return pb.TaskStatus_TASK_STATUS_PENDING
 	case domain.TaskStatusRunning:
-		return pb.TaskStatus_STATUS_RUNNING
+		return pb.TaskStatus_TASK_STATUS_RUNNING
 	case domain.TaskStatusCompleted:
-		return pb.TaskStatus_STATUS_COMPLETED
+		return pb.TaskStatus_TASK_STATUS_COMPLETED
 	case domain.TaskStatusFailed:
-		return pb.TaskStatus_STATUS_FAILED
+		return pb.TaskStatus_TASK_STATUS_FAILED
 	default:
-		return pb.TaskStatus_STATUS_PENDING
+		return pb.TaskStatus_TASK_STATUS_PENDING
 	}
 }
 
@@ -128,7 +128,7 @@ func convertNextFromProto(pbNext []*pb.CreateTaskRequest) ([]*domain.Task, error
 	if len(pbNext) == 0 {
 		return []*domain.Task{}, nil
 	}
-	var out []*domain.Task
+	out := []*domain.Task{}
 	for _, t := range pbNext {
 		if t == nil || t.GetName() == "" {
 			continue
@@ -156,11 +156,11 @@ func convertNextToProto(t []*domain.Task) []*pb.Task {
 
 func convertTaskTypeFromProto(tt pb.TaskType) domain.TaskType {
 	switch tt {
-	case pb.TaskType_UNSPECIFIED:
+	case pb.TaskType_TASK_TYPE_UNSPECIFIED:
 		return domain.TaskTypeUnspecified
-	case pb.TaskType_LOG:
+	case pb.TaskType_TASK_TYPE_LOG:
 		return domain.TaskTypeLog
-	case pb.TaskType_HTTP:
+	case pb.TaskType_TASK_TYPE_HTTP:
 		return domain.TaskTypeHTTP
 	default:
 		return domain.TaskTypeUnspecified
@@ -170,13 +170,13 @@ func convertTaskTypeFromProto(tt pb.TaskType) domain.TaskType {
 func convertTaskTypeToProto(tt domain.TaskType) pb.TaskType {
 	switch tt {
 	case domain.TaskTypeUnspecified:
-		return pb.TaskType_UNSPECIFIED
+		return pb.TaskType_TASK_TYPE_UNSPECIFIED
 	case domain.TaskTypeLog:
-		return pb.TaskType_LOG
+		return pb.TaskType_TASK_TYPE_LOG
 	case domain.TaskTypeHTTP:
-		return pb.TaskType_HTTP
+		return pb.TaskType_TASK_TYPE_HTTP
 	default:
-		return pb.TaskType_UNSPECIFIED
+		return pb.TaskType_TASK_TYPE_UNSPECIFIED
 	}
 }
 
@@ -240,9 +240,9 @@ func convertHTTPAuthToProto(auth domain.HTTPAuthType) *pb.HTTPAuth {
 
 func convertHTTPApiKeyLocationFromProto(location pb.HTTPApiKeyLocation) domain.HTTPApiKeyLocation {
 	switch location {
-	case pb.HTTPApiKeyLocation_HEADER:
+	case pb.HTTPApiKeyLocation_HTTP_API_KEY_LOCATION_HEADER:
 		return domain.HTTPApiKeyLocationHeader
-	case pb.HTTPApiKeyLocation_QUERY:
+	case pb.HTTPApiKeyLocation_HTTP_API_KEY_LOCATION_QUERY:
 		return domain.HTTPApiKeyLocationQuery
 	default:
 		return domain.HTTPApiKeyLocationHeader
@@ -252,10 +252,10 @@ func convertHTTPApiKeyLocationFromProto(location pb.HTTPApiKeyLocation) domain.H
 func convertHTTPApiKeyLocationToProto(location domain.HTTPApiKeyLocation) pb.HTTPApiKeyLocation {
 	switch location {
 	case domain.HTTPApiKeyLocationHeader:
-		return pb.HTTPApiKeyLocation_HEADER
+		return pb.HTTPApiKeyLocation_HTTP_API_KEY_LOCATION_HEADER
 	case domain.HTTPApiKeyLocationQuery:
-		return pb.HTTPApiKeyLocation_QUERY
+		return pb.HTTPApiKeyLocation_HTTP_API_KEY_LOCATION_QUERY
 	default:
-		return pb.HTTPApiKeyLocation_HEADER
+		return pb.HTTPApiKeyLocation_HTTP_API_KEY_LOCATION_HEADER
 	}
 }

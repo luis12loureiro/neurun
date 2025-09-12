@@ -7,17 +7,17 @@ option go_package = "github.com/luis12loureiro/neurun/api/gen/neurun";
 import "google/protobuf/duration.proto";
 
 enum TaskType {
-  UNSPECIFIED = 0;
-  LOG = 1;
-  HTTP = 2;
+  TASK_TYPE_UNSPECIFIED = 0;
+  TASK_TYPE_LOG = 1;
+  TASK_TYPE_HTTP = 2;
 }
 
 enum TaskStatus {
-  STATUS_UNSPECIFIED = 0;
-  STATUS_PENDING = 1;
-  STATUS_RUNNING = 2;
-  STATUS_COMPLETED = 3;
-  STATUS_FAILED = 4;
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_RUNNING = 2;
+  TASK_STATUS_COMPLETED = 3;
+  TASK_STATUS_FAILED = 4;
 }
 
 message CreateTaskRequest {
@@ -55,7 +55,7 @@ message LogPayload {
 message HTTPPayload {
   string url = 1;
   string method = 2;
-  string body = 3;
+  bytes body = 3;
   map<string, string> headers = 4;
   map<string, string> queryParams = 5;
   google.protobuf.Duration timeout = 6;
@@ -89,8 +89,9 @@ message HTTPApiKeyAuth {
 }
 
 enum HTTPApiKeyLocation {
-  HEADER = 0;
-  QUERY = 1;
+  HTTP_API_KEY_LOCATION_UNSPECIFIED = 0;
+  HTTP_API_KEY_LOCATION_HEADER = 1;
+  HTTP_API_KEY_LOCATION_QUERY = 2;
 }
 
 

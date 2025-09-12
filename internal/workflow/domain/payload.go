@@ -19,16 +19,30 @@ func (l *LogPayload) Type() TaskType {
 	return TaskTypeLog
 }
 
+type HTTPApiKeyLocation string
+
+const (
+	HTTPMinTimeout                              = 0 * time.Second
+	HTTPMaxTimeout                              = 30 * time.Second
+	HTTPMinStatusCode                           = 100
+	HTTPMaxStatusCode                           = 599
+	HTTPBasicAuthType                           = "basic"
+	HTTPBearerAuthType                          = "bearer"
+	HTTPApiKeyAuthType                          = "apikey"
+	HTTPApiKeyLocationHeader HTTPApiKeyLocation = "HEADER"
+	HTTPApiKeyLocationQuery  HTTPApiKeyLocation = "QUERY"
+)
+
 type HTTPPayload struct {
 	URL                string
 	Method             string
-	Body               string
+	Body               []byte
 	Headers            map[string]string
 	QueryParams        map[string]string
-	Timeout            time.Duration
+	Timeout            time.Duration // max time to wait for a response
 	Auth               HTTPAuthType
-	FollowRedirects    bool
-	VerifySSL          bool
+	FollowRedirects    bool // whether to follow HTTP redirects
+	VerifySSL          bool // whether to verify SSL certificates
 	ExpectedStatusCode int32
 }
 
@@ -36,19 +50,16 @@ func (h *HTTPPayload) Type() TaskType {
 	return TaskTypeHTTP
 }
 
-func NewHTTPPayload(urlStr, method, body string, headers, queryParams map[string]string,
+func NewHTTPPayload(urlStr, method string, body []byte, headers, queryParams map[string]string,
 	timeout time.Duration, auth HTTPAuthType, followRedirects, verifySSL bool,
 	expectedStatusCode int32) (*HTTPPayload, error) {
 
-	// Validate URL
 	if urlStr == "" {
 		return nil, fmt.Errorf("URL cannot be empty")
 	}
 	if _, err := url.Parse(urlStr); err != nil {
 		return nil, fmt.Errorf("invalid URL: %w", err)
 	}
-
-	// Validate method
 	if method == "" {
 		return nil, fmt.Errorf("HTTP method cannot be empty")
 	}
@@ -64,25 +75,17 @@ func NewHTTPPayload(urlStr, method, body string, headers, queryParams map[string
 	if !valid {
 		return nil, fmt.Errorf("invalid HTTP method: %s", method)
 	}
-
-	// Validate timeout
-	if timeout < 0 {
-		return nil, fmt.Errorf("timeout cannot be negative")
+	if timeout < HTTPMinTimeout || timeout > HTTPMaxTimeout {
+		return nil, fmt.Errorf("timeout must be between %d and %d", HTTPMinTimeout, HTTPMaxTimeout)
 	}
-
-	// Validate status code
-	if expectedStatusCode < 100 || expectedStatusCode > 599 {
+	if expectedStatusCode < HTTPMinStatusCode || expectedStatusCode > HTTPMaxStatusCode {
 		return nil, fmt.Errorf("invalid HTTP status code: %d", expectedStatusCode)
 	}
-
-	// Validate auth if provided
 	if auth != nil {
 		if err := validateHTTPAuth(auth); err != nil {
 			return nil, fmt.Errorf("invalid auth: %w", err)
 		}
 	}
-
-	// Initialize maps if nil
 	if headers == nil {
 		headers = make(map[string]string)
 	}
@@ -163,16 +166,3 @@ type HTTPApiKeyAuth struct {
 func (h *HTTPApiKeyAuth) Type() string {
 	return HTTPApiKeyAuthType
 }
-
-type HTTPApiKeyLocation int
-
-const (
-	HTTPApiKeyLocationHeader HTTPApiKeyLocation = 0
-	HTTPApiKeyLocationQuery  HTTPApiKeyLocation = 1
-)
-
-const (
-	HTTPBasicAuthType  = "basic"
-	HTTPBearerAuthType = "bearer"
-	HTTPApiKeyAuthType = "apikey"
-)
