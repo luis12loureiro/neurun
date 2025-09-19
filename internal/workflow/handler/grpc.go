@@ -43,7 +43,7 @@ func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest
 	}, nil
 }
 
-func (h *handler) GetWorkflow(_ context.Context, in *pb.GetWorkflowRequest) (*pb.WorkflowResponse, error) {
+func (h *handler) GetWorkflow(ctx context.Context, in *pb.GetWorkflowRequest) (*pb.WorkflowResponse, error) {
 	wf, err := h.s.Get(in.GetId())
 	if err != nil {
 		return nil, err

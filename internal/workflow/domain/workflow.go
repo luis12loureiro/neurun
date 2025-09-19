@@ -33,6 +33,7 @@ type Workflow struct {
 type WorkflowRepository interface {
 	Create(w *Workflow) error
 	Get(id string) (*Workflow, error)
+	// Update(w *Workflow) error
 }
 
 func NewWorkflow(name string, description string, tasks []*Task) (*Workflow, error) {

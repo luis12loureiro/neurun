@@ -25,8 +25,18 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	repo := wr.NewJSONRepository("./internal/workflow/repository/storage", "data.ndjson")
-	svc := ws.NewService(repo)
+	repo, err := wr.NewSQLiteRepository("./internal/workflow/repository/storage", "data.sqlite")
+	if err != nil {
+		log.Fatalf("failed to create repository: %v", err)
+	}
+	defer func() {
+		if sqliteRepo, ok := repo.(*wr.SQLiteRepo); ok {
+			sqliteRepo.Close()
+		}
+	}()
+	te := ws.NewTaskExecutor()
+	we := ws.NewWorkflowExecutor(repo, te)
+	svc := ws.NewService(repo, we)
 	handler := wh.NewServer(svc)
 	pb.RegisterWorkflowServiceServer(s, handler)
 

@@ -45,3 +45,16 @@
 - Implement task execution
 - Implement better error handling
 </details>
+
+<details>
+<summary><h3>19/09/2025</h3></summary>
+
+**Work done**
+- Started implementing workflow execution for log tasks
+- Started adding sqlite repository
+
+**TODO**
+- Finish workflow log task executing
+- Finish implementing the sqlite repo
+- Implement pooling for the db
+</details>
