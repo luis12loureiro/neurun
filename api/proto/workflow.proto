@@ -10,7 +10,7 @@ import "task.proto";
 service WorkflowService {
     rpc CreateWorkflow(CreateWorkflowRequest) returns (WorkflowResponse);
     rpc GetWorkflow(GetWorkflowRequest) returns (WorkflowResponse);
-    //rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (WorkflowResponse);
+    rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (ExecuteWorkflowResponse);
 }
 
 message CreateWorkflowRequest {
@@ -29,4 +29,21 @@ message WorkflowResponse {
     string description = 3;
     string status = 4;
     repeated Task tasks = 5;
+}
+
+message ExecuteWorkflowRequest {
+    string id = 1;
+}
+
+message ExecuteWorkflowResponse {
+    string id = 1;
+    WorkflowStatus status = 2;
+}
+
+enum WorkflowStatus {
+  WORKFLOW_STATUS_UNSPECIFIED = 0;
+  WORKFLOW_STATUS_IDLE = 1;
+  WORKFLOW_STATUS_RUNNING = 2;
+  WORKFLOW_STATUS_COMPLETED = 3;
+  WORKFLOW_STATUS_FAILED = 4;
 }

@@ -60,3 +60,16 @@ func (h *handler) GetWorkflow(ctx context.Context, in *pb.GetWorkflowRequest) (*
 		Tasks:       tasks,
 	}, nil
 }
+
+func (h *handler) ExecuteWorkflow(ctx context.Context, in *pb.ExecuteWorkflowRequest) (*pb.ExecuteWorkflowResponse, error) {
+	err := h.s.Execute(ctx, in.GetId())
+	if err != nil {
+		return nil, err
+	}
+	// TODO: stream updates of workflow execution status
+	// For now, just return completed
+	return &pb.ExecuteWorkflowResponse{
+		Id:     in.GetId(),
+		Status: pb.WorkflowStatus_WORKFLOW_STATUS_COMPLETED,
+	}, nil
+}
