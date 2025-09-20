@@ -39,3 +39,4 @@ api/gen/**/*.pb.go
 
 # storage files
 internal/workflow/repository/storage/**/*.ndjson
+internal/workflow/repository/storage/**/*.sqlite
