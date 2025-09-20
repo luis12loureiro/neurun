@@ -58,3 +58,19 @@
 - Finish implementing the sqlite repo
 - Implement pooling for the db
 </details>
+
+<details>
+<summary><h3>20/09/2025</h3></summary>
+
+**Work done**
+- Fix sqlite repository get and create methods
+- Add memory repository for simplicity
+- Add execute worklow new service method
+- Finish workflow log task executing
+
+**TODO**
+- Make execute service method return a stream sending the current status of the workflow
+- Finish workflow http task executing
+- Implement pooling for the db
+- Implement better error handling and logging
+</details>
