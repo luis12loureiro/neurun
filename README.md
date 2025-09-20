@@ -1,4 +1,4 @@
-# Workflow Automation Server
+# Neurun
 
 A **workflow automation engine** implemented as a **gRPC server in Go**. It enables users to define workflows composed of multiple tasks with event triggers, retries, delays, and conditional execution.
 
