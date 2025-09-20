@@ -25,15 +25,16 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	repo, err := wr.NewSQLiteRepository("./internal/workflow/repository/storage", "data.sqlite")
-	if err != nil {
-		log.Fatalf("failed to create repository: %v", err)
-	}
-	defer func() {
-		if sqliteRepo, ok := repo.(*wr.SQLiteRepo); ok {
-			sqliteRepo.Close()
-		}
-	}()
+	// repo, err := wr.NewSQLiteRepository("./internal/workflow/repository/storage", "data.sqlite")
+	// if err != nil {
+	// 	log.Fatalf("failed to create repository: %v", err)
+	// }
+	// defer func() {
+	// 	if sqliteRepo, ok := repo.(*wr.SQLiteRepo); ok {
+	// 		sqliteRepo.Close()
+	// 	}
+	// }()
+	repo := wr.NewMemoryRepository()
 	te := ws.NewTaskExecutor()
 	we := ws.NewWorkflowExecutor(repo, te)
 	svc := ws.NewService(repo, we)
