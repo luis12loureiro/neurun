@@ -7,7 +7,7 @@ import (
 )
 
 type WorkflowExecutor interface {
-	Execute(ctx context.Context, w *domain.Workflow) error
+	Execute(ctx context.Context, w *domain.Workflow, resultCh chan<- map[string]interface{}) error
 }
 
 type workflowExecutor struct {
@@ -22,11 +22,11 @@ func NewWorkflowExecutor(r domain.WorkflowRepository, te TaskExecutor) WorkflowE
 	}
 }
 
-func (we *workflowExecutor) Execute(ctx context.Context, w *domain.Workflow) error {
+func (we *workflowExecutor) Execute(ctx context.Context, w *domain.Workflow, resultCh chan<- map[string]interface{}) error {
 	w.Status = domain.WorkflowStatusRunning
 	// TODO: persist status change by having update method in repository
 	for _, t := range w.Tasks {
-		if err := we.executeTaskChain(ctx, t); err != nil {
+		if err := we.executeTaskChain(ctx, t, resultCh); err != nil {
 			w.Status = domain.WorkflowStatusFailed
 			// TODO: persist status change by having update method in repository
 			return err
@@ -37,14 +37,22 @@ func (we *workflowExecutor) Execute(ctx context.Context, w *domain.Workflow) err
 	return nil
 }
 
-func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.Task) error {
+func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.Task, resultCh chan<- map[string]interface{}) error {
 	// execute current task
-	if err := we.te.Execute(ctx, task); err != nil {
+	result, err := we.te.Execute(ctx, task)
+	if err != nil {
 		return err
 	}
+
+	resultCh <- map[string]interface{}{
+		"task_id": task.ID,
+		"status":  task.Status,
+		"output":  result,
+	}
+
 	// execute next tasks if current task succeeded
 	for _, nextTask := range task.Next {
-		if err := we.executeTaskChain(ctx, nextTask); err != nil {
+		if err := we.executeTaskChain(ctx, nextTask, resultCh); err != nil {
 			return err
 		}
 	}

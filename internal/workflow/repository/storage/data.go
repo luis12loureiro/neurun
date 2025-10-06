@@ -37,6 +37,30 @@ var DefaultWorkflows = map[string]domain.Workflow{
 					},
 				},
 			},
+			{
+				ID:         "task3",
+				Name:       "Task 3",
+				Type:       domain.TaskTypeLog,
+				Status:     domain.TaskStatusPending,
+				Retries:    1,
+				RetryDelay: 2 * time.Second,
+				Payload: &domain.LogPayload{
+					Message: "Hallo, Welt!",
+				},
+				Next: []*domain.Task{
+					{
+						ID:         "task4",
+						Name:       "Task 4",
+						Type:       domain.TaskTypeLog,
+						Status:     domain.TaskStatusPending,
+						Retries:    2,
+						RetryDelay: 3 * time.Second,
+						Payload: &domain.LogPayload{
+							Message: "Ich bin Luís!",
+						},
+					},
+				},
+			},
 		},
 	},
 	"wf2": {

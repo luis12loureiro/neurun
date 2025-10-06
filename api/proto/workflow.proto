@@ -10,7 +10,7 @@ import "task.proto";
 service WorkflowService {
     rpc CreateWorkflow(CreateWorkflowRequest) returns (WorkflowResponse);
     rpc GetWorkflow(GetWorkflowRequest) returns (WorkflowResponse);
-    rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (ExecuteWorkflowResponse);
+    rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (stream ExecuteWorkflowResponse);
 }
 
 message CreateWorkflowRequest {
@@ -37,7 +37,8 @@ message ExecuteWorkflowRequest {
 
 message ExecuteWorkflowResponse {
     string id = 1;
-    WorkflowStatus status = 2;
+    string result = 2;
+    //WorkflowStatus status = 2;
 }
 
 enum WorkflowStatus {

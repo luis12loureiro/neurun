@@ -3,12 +3,14 @@ package workflow
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/luis12loureiro/neurun/internal/workflow/domain"
 )
 
 type TaskExecutor interface {
-	Execute(ctx context.Context, t *domain.Task) error
+	Execute(ctx context.Context, t *domain.Task) (interface{}, error)
 }
 
 type taskExecutor struct {
@@ -23,19 +25,22 @@ func NewTaskExecutor() TaskExecutor {
 	}
 }
 
-func (te *taskExecutor) Execute(ctx context.Context, t *domain.Task) error {
+func (te *taskExecutor) Execute(ctx context.Context, t *domain.Task) (interface{}, error) {
 	t.Status = domain.TaskStatusRunning
 
 	var err error
+	var output interface{}
 	switch t.Type {
 	case domain.TaskTypeHTTP:
-		return fmt.Errorf("HTTP task executor not implemented yet")
+		return nil, fmt.Errorf("HTTP task executor not implemented yet")
 	case domain.TaskTypeLog:
 		logPayload, ok := t.Payload.(*domain.LogPayload)
 		if !ok {
 			err = fmt.Errorf("invalid payload type for LOG task")
 		} else {
-			_, err = fmt.Println(logPayload.Message)
+			randomSeconds := rand.Intn(3)
+			time.Sleep(time.Duration(randomSeconds) * time.Second)
+			output = logPayload.Message
 		}
 	default:
 		err = fmt.Errorf("unknown task type: %v", t.Type)
@@ -43,9 +48,9 @@ func (te *taskExecutor) Execute(ctx context.Context, t *domain.Task) error {
 
 	if err != nil {
 		t.Status = domain.TaskStatusFailed
-		return err
+		return nil, err
 	} else {
 		t.Status = domain.TaskStatusCompleted
 	}
-	return nil
+	return output, nil
 }

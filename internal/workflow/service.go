@@ -9,7 +9,7 @@ import (
 type Service interface {
 	Create(w *domain.Workflow) (*domain.Workflow, error)
 	Get(id string) (*domain.Workflow, error)
-	Execute(ctx context.Context, id string) error
+	Execute(ctx context.Context, id string, resultCh chan<- map[string]interface{}) error
 }
 
 type service struct {
@@ -32,10 +32,10 @@ func (s *service) Get(id string) (*domain.Workflow, error) {
 	return s.r.Get(id)
 }
 
-func (s *service) Execute(ctx context.Context, id string) error {
+func (s *service) Execute(ctx context.Context, id string, resultCh chan<- map[string]interface{}) error {
 	w, err := s.r.Get(id)
 	if err != nil {
 		return err
 	}
-	return s.we.Execute(ctx, w)
+	return s.we.Execute(ctx, w, resultCh)
 }

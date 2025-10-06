@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/luis12loureiro/neurun/api/gen"
 	"github.com/luis12loureiro/neurun/internal/workflow"
@@ -61,15 +62,29 @@ func (h *handler) GetWorkflow(ctx context.Context, in *pb.GetWorkflowRequest) (*
 	}, nil
 }
 
-func (h *handler) ExecuteWorkflow(ctx context.Context, in *pb.ExecuteWorkflowRequest) (*pb.ExecuteWorkflowResponse, error) {
-	err := h.s.Execute(ctx, in.GetId())
-	if err != nil {
-		return nil, err
+func (h *handler) ExecuteWorkflow(req *pb.ExecuteWorkflowRequest, stream pb.WorkflowService_ExecuteWorkflowServer) error {
+	ctx := stream.Context()
+	resultCh := make(chan map[string]interface{})
+	go func() {
+		defer close(resultCh)
+		// TODO: Handle error !!!!
+		_ = h.s.Execute(ctx, req.GetId(), resultCh)
+	}()
+
+	for result := range resultCh {
+		r, ok := result["output"].(string)
+		if !ok {
+			return fmt.Errorf("output is not a string")
+		}
+		resp := &pb.ExecuteWorkflowResponse{
+			Id:     req.GetId(),
+			Result: r,
+		}
+		if err := stream.Send(resp); err != nil {
+			return err
+		}
 	}
 	// TODO: stream updates of workflow execution status
 	// For now, just return completed
-	return &pb.ExecuteWorkflowResponse{
-		Id:     in.GetId(),
-		Status: pb.WorkflowStatus_WORKFLOW_STATUS_COMPLETED,
-	}, nil
+	return nil
 }
