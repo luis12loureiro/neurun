@@ -84,7 +84,5 @@ func (h *handler) ExecuteWorkflow(req *pb.ExecuteWorkflowRequest, stream pb.Work
 			return err
 		}
 	}
-	// TODO: stream updates of workflow execution status
-	// For now, just return completed
 	return nil
 }

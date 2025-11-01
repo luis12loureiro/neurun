@@ -2,6 +2,7 @@ package workflow
 
 import (
 	"context"
+	"sync"
 
 	"github.com/luis12loureiro/neurun/internal/workflow/domain"
 )
@@ -23,22 +24,48 @@ func NewWorkflowExecutor(r domain.WorkflowRepository, te TaskExecutor) WorkflowE
 }
 
 func (we *workflowExecutor) Execute(ctx context.Context, w *domain.Workflow, resultCh chan<- map[string]interface{}) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, 1)
+
 	w.Status = domain.WorkflowStatusRunning
 	// TODO: persist status change by having update method in repository
 	for _, t := range w.Tasks {
-		if err := we.executeTaskChain(ctx, t, resultCh); err != nil {
-			w.Status = domain.WorkflowStatusFailed
-			// TODO: persist status change by having update method in repository
-			return err
-		}
+		wg.Add(1)
+		go func(task *domain.Task) {
+			defer wg.Done()
+			if err := we.executeTaskChain(ctx, task, resultCh); err != nil {
+				select {
+				case errCh <- err:
+					cancel() // cancel all other tasks
+				default: // error already sent, ignore
+				}
+			}
+		}(t)
 	}
-	w.Status = domain.WorkflowStatusCompleted
-	// TODO: persist status change by having update method in repository
-	return nil
+	wg.Wait()
+
+	select {
+	case err := <-errCh:
+		w.Status = domain.WorkflowStatusFailed
+		// TODO: persist status change by having update method in repository
+		return err
+	default:
+		w.Status = domain.WorkflowStatusCompleted
+		// TODO: persist status change by having update method in repository
+		return nil
+	}
 }
 
 func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.Task, resultCh chan<- map[string]interface{}) error {
-	// execute current task
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
 	result, err := we.te.Execute(ctx, task)
 	if err != nil {
 		return err
@@ -50,11 +77,28 @@ func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.T
 		"output":  result,
 	}
 
+	var wg sync.WaitGroup
+	errCh := make(chan error, 1)
+
 	// execute next tasks if current task succeeded
 	for _, nextTask := range task.Next {
-		if err := we.executeTaskChain(ctx, nextTask, resultCh); err != nil {
-			return err
-		}
+		wg.Add(1)
+		go func(nt *domain.Task) {
+			defer wg.Done()
+			if err := we.executeTaskChain(ctx, nt, resultCh); err != nil {
+				select {
+				case errCh <- err:
+				default: // error already sent, ignore
+				}
+			}
+		}(nextTask)
 	}
-	return nil
+	wg.Wait()
+
+	select {
+	case err := <-errCh:
+		return err
+	default:
+		return nil
+	}
 }

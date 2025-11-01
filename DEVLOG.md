@@ -74,3 +74,16 @@
 - Implement pooling for the db
 - Implement better error handling and logging
 </details>
+
+<details>
+<summary><h3>01/11/2025</h3></summary>
+
+**Work done**
+- Make execute service method return a stream sending the current status of the workflow
+- Add concurreny to task execution. But it was only tested with log taks.
+
+**TODO**
+- Finish workflow http task executing
+- Implement pooling for the db
+- Implement better error handling and logging
+</details>
