@@ -65,24 +65,39 @@ func (h *handler) GetWorkflow(ctx context.Context, in *pb.GetWorkflowRequest) (*
 func (h *handler) ExecuteWorkflow(req *pb.ExecuteWorkflowRequest, stream pb.WorkflowService_ExecuteWorkflowServer) error {
 	ctx := stream.Context()
 	resultCh := make(chan map[string]interface{})
+	errCh := make(chan error, 1)
 	go func() {
 		defer close(resultCh)
-		// TODO: Handle error !!!!
-		_ = h.s.Execute(ctx, req.GetId(), resultCh)
+		if err := h.s.Execute(ctx, req.GetId(), resultCh); err != nil {
+			errCh <- err
+		}
 	}()
 
-	for result := range resultCh {
-		r, ok := result["output"].(string)
-		if !ok {
-			return fmt.Errorf("output is not a string")
-		}
-		resp := &pb.ExecuteWorkflowResponse{
-			Id:     req.GetId(),
-			Result: r,
-		}
-		if err := stream.Send(resp); err != nil {
-			return err
+	for {
+		select {
+		case result, ok := <-resultCh:
+			if !ok {
+				// Channel closed, check for error
+				select {
+				case err := <-errCh:
+					return err // Return execution error to client
+				default:
+					return nil // Success
+				}
+			}
+			r, ok := result["output"].(string)
+			if !ok {
+				return fmt.Errorf("output is not a string, got type %T", result["output"])
+			}
+			resp := &pb.ExecuteWorkflowResponse{
+				Id:     req.GetId(),
+				Result: r,
+			}
+			if err := stream.Send(resp); err != nil {
+				return err
+			}
+		case err := <-errCh:
+			return err // Return error immediately
 		}
 	}
-	return nil
 }
