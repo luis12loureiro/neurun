@@ -1,97 +1,80 @@
 package storage
 
 import (
-	"time"
-
 	"github.com/luis12loureiro/neurun/internal/workflow/domain"
 )
 
-var DefaultWorkflows = map[string]domain.Workflow{
-	"wf1": {
-		ID:          "wf1",
-		Name:        "Default Workflow 1",
-		Description: "This is the first default workflow",
-		Status:      domain.WorkflowStatusIDLE,
-		Tasks: []*domain.Task{
+// Fan-In Test Workflow: 3 root tasks (A, B, C) all point to 1 shared task (D)
+var (
+	sharedTaskD = &domain.Task{
+		ID:         "task-d",
+		Name:       "Shared Task D",
+		Type:       domain.TaskTypeLog,
+		Status:     domain.TaskStatusPending,
+		Retries:    0,
+		RetryDelay: 0,
+		Payload: &domain.LogPayload{
+			Message: "✅ All 3 tasks completed! (A, B, C)",
+		},
+		Next: []*domain.Task{
 			{
-				ID:         "task1",
-				Name:       "Task 1",
+				ID:         "task-e",
+				Name:       "Task E",
 				Type:       domain.TaskTypeLog,
 				Status:     domain.TaskStatusPending,
-				Retries:    1,
-				RetryDelay: 2 * time.Second,
+				Retries:    0,
+				RetryDelay: 0,
 				Payload: &domain.LogPayload{
-					Message: "Hello, World!",
-				},
-				Next: []*domain.Task{
-					{
-						ID:         "task2",
-						Name:       "Task 2",
-						Type:       domain.TaskTypeLog,
-						Status:     domain.TaskStatusPending,
-						Retries:    2,
-						RetryDelay: 3 * time.Second,
-						Payload: &domain.LogPayload{
-							Message: "My name is Luís!",
-						},
-						Next: []*domain.Task{
-							{
-								ID:         "task6",
-								Name:       "Task 6",
-								Type:       domain.TaskTypeLog,
-								Status:     domain.TaskStatusPending,
-								Retries:    2,
-								RetryDelay: 3 * time.Second,
-								Payload: &domain.LogPayload{
-									Message: "How are you?",
-								},
-							},
-						},
-					},
-					{
-						ID:         "task5",
-						Name:       "Task 5",
-						Type:       domain.TaskTypeLog,
-						Status:     domain.TaskStatusPending,
-						Retries:    2,
-						RetryDelay: 3 * time.Second,
-						Payload: &domain.LogPayload{
-							Message: "Another 1",
-						},
-					},
-				},
-			},
-			{
-				ID:         "task3",
-				Name:       "Task 3",
-				Type:       domain.TaskTypeLog,
-				Status:     domain.TaskStatusPending,
-				Retries:    1,
-				RetryDelay: 2 * time.Second,
-				Payload: &domain.LogPayload{
-					Message: "Hallo, Welt!",
-				},
-				Next: []*domain.Task{
-					{
-						ID:         "task4",
-						Name:       "Task 4",
-						Type:       domain.TaskTypeLog,
-						Status:     domain.TaskStatusPending,
-						Retries:    2,
-						RetryDelay: 3 * time.Second,
-						Payload: &domain.LogPayload{
-							Message: "Ich bin Luís!",
-						},
-					},
+					Message: "Task E executing",
 				},
 			},
 		},
-	},
-	"wf2": {
-		ID:          "wf2",
-		Name:        "Default Workflow 2",
-		Description: "This is the second default workflow",
-		Status:      domain.WorkflowStatusIDLE,
-		Tasks:       []*domain.Task{},
-	},
-}
+	}
+
+	DefaultWorkflows = map[string]domain.Workflow{
+		"fan-in-test": {
+			ID:          "fan-in-test",
+			Name:        "Fan-In Test",
+			Description: "3 root tasks → 1 shared task",
+			Status:      domain.WorkflowStatusIDLE,
+			Tasks: []*domain.Task{
+				{
+					ID:         "task-a",
+					Name:       "Root Task A",
+					Type:       domain.TaskTypeLog,
+					Status:     domain.TaskStatusPending,
+					Retries:    0,
+					RetryDelay: 0,
+					Payload: &domain.LogPayload{
+						Message: "🅰️  Task A executing",
+					},
+					Next: []*domain.Task{sharedTaskD},
+				},
+				{
+					ID:         "task-b",
+					Name:       "Root Task B",
+					Type:       domain.TaskTypeLog,
+					Status:     domain.TaskStatusPending,
+					Retries:    0,
+					RetryDelay: 0,
+					Payload: &domain.LogPayload{
+						Message: "🅱️  Task B executing",
+					},
+					Next: []*domain.Task{sharedTaskD},
+				},
+				{
+					ID:         "task-c",
+					Name:       "Root Task C",
+					Type:       domain.TaskTypeLog,
+					Status:     domain.TaskStatusPending,
+					Retries:    0,
+					RetryDelay: 0,
+					Payload: &domain.LogPayload{
+						Message: "🅲  Task C executing",
+					},
+					Next: []*domain.Task{sharedTaskD},
+				},
+			},
+		},
+	}
+)
