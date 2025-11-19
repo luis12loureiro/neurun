@@ -84,13 +84,13 @@ func (we *workflowExecutor) buildPendingDeps(rootTasks []*domain.Task) map[strin
 		}
 		visited[task.ID] = true
 
-		// Initialize atomic counter to 0 if not exists
+		// initialize atomic counter to 0 if not exists
 		if _, exists := pendingDeps[task.ID]; !exists {
 			pendingDeps[task.ID] = &atomic.Int32{}
 			pendingDeps[task.ID].Store(0)
 		}
 
-		// Each "next" task has one more predecessor
+		// each next task has one more predecessor
 		for _, nextTask := range task.Next {
 			if _, exists := pendingDeps[nextTask.ID]; !exists {
 				pendingDeps[nextTask.ID] = &atomic.Int32{}
@@ -124,7 +124,7 @@ func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.T
 	// check if all dependencies are satisfied
 	counter := pendingDeps[task.ID]
 	if counter.Load() > 0 {
-		// Not ready yet, skip (another goroutine will execute when ready)
+		// not ready yet, skip (another goroutine will execute when ready)
 		return nil
 	}
 
@@ -151,10 +151,10 @@ func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.T
 
 	// execute next tasks if current task succeeded
 	for _, nextTask := range task.Next {
-		// Atomically decrement the pending count for the next task
+		// atomically decrement the pending count for the next task
 		newCount := pendingDeps[nextTask.ID].Add(-1)
 
-		// If count reaches 0, all dependencies are satisfied
+		// if count reaches 0, all dependencies are satisfied
 		if newCount == 0 {
 			wg.Add(1) // increment wg counter
 			go func(nt *domain.Task) {
