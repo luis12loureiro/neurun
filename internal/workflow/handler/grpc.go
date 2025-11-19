@@ -89,9 +89,19 @@ func (h *handler) ExecuteWorkflow(req *pb.ExecuteWorkflowRequest, stream pb.Work
 			if !ok {
 				return fmt.Errorf("output is not a string, got type %T", result["output"])
 			}
+
+			taskID, _ := result["taskId"].(string)
+			workflowStatus, _ := result["workflowStatus"].(domain.WorklowStatus)
+			totalTasks, _ := result["totalTasks"].(int)
+			executedTasks, _ := result["executedTasks"].(int)
+
 			resp := &pb.ExecuteWorkflowResponse{
-				Id:     req.GetId(),
-				Result: r,
+				WorkflowId:     req.GetId(),
+				TaskId:         taskID,
+				TaskResult:     r,
+				WorkflowStatus: pb.WorkflowStatus(pb.WorkflowStatus_value["WORKFLOW_STATUS_"+string(workflowStatus)]),
+				TotalTasks:     int32(totalTasks),
+				ExecutedTasks:  int32(executedTasks),
 			}
 			if err := stream.Send(resp); err != nil {
 				return err

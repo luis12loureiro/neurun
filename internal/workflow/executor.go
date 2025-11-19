@@ -37,19 +37,24 @@ func (we *workflowExecutor) Execute(ctx context.Context, w *domain.Workflow, res
 	// Build pending dependency counters for fan-in support
 	pendingDeps := we.buildPendingDeps(w.Tasks)
 
+	// Calculate total tasks in the workflow (count all tasks in pendingDeps map)
+	totalTasks := len(pendingDeps)
+
 	// track root tasks
 	var wg sync.WaitGroup
 	// buffered channel to capture first error without blocking
 	errCh := make(chan error, 1)
 	// track completed tasks to prevent cycles (thread-safe)
 	completed := &sync.Map{}
+	// track executed tasks count (thread-safe)
+	executedCount := &atomic.Int32{}
 
 	w.Status = domain.WorkflowStatusRunning
 	for _, t := range w.Tasks {
 		wg.Add(1) // increment wg counter
 		go func(task *domain.Task) {
 			defer wg.Done() // decrement wg counter
-			if err := we.executeTaskChain(ctx, task, resultCh, pendingDeps, completed); err != nil {
+			if err := we.executeTaskChain(ctx, w, task, resultCh, pendingDeps, completed, executedCount, totalTasks); err != nil {
 				select {
 				case errCh <- err:
 					cancel() // cancel all other tasks
@@ -67,6 +72,14 @@ func (we *workflowExecutor) Execute(ctx context.Context, w *domain.Workflow, res
 		return err
 	default:
 		w.Status = domain.WorkflowStatusCompleted
+		resultCh <- map[string]interface{}{
+			"taskId":         "",
+			"status":         "",
+			"output":         "",
+			"workflowStatus": w.Status,
+			"totalTasks":     totalTasks,
+			"executedTasks":  int(executedCount.Load()),
+		}
 		return nil
 	}
 }
@@ -108,7 +121,16 @@ func (we *workflowExecutor) buildPendingDeps(rootTasks []*domain.Task) map[strin
 	return pendingDeps
 }
 
-func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.Task, resultCh chan<- map[string]interface{}, pendingDeps map[string]*atomic.Int32, completed *sync.Map) error {
+func (we *workflowExecutor) executeTaskChain(
+	ctx context.Context,
+	w *domain.Workflow,
+	task *domain.Task,
+	resultCh chan<- map[string]interface{},
+	pendingDeps map[string]*atomic.Int32,
+	completed *sync.Map,
+	executedCount *atomic.Int32,
+	totalTasks int,
+) error {
 	// check for context cancellation
 	select {
 	case <-ctx.Done():
@@ -137,11 +159,17 @@ func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.T
 	// mark task as completed
 	completed.Store(task.ID, true)
 
+	// increment executed count
+	count := executedCount.Add(1)
+
 	// stream result to channel
 	resultCh <- map[string]interface{}{
-		"task_id": task.ID,
-		"status":  task.Status,
-		"output":  result,
+		"taskId":         task.ID,
+		"status":         task.Status,
+		"output":         result,
+		"workflowStatus": w.Status,
+		"totalTasks":     totalTasks,
+		"executedTasks":  int(count),
 	}
 
 	// track next tasks
@@ -160,7 +188,7 @@ func (we *workflowExecutor) executeTaskChain(ctx context.Context, task *domain.T
 			go func(nt *domain.Task) {
 				defer wg.Done() // decrement wg counter
 				// recursively execute next tasks
-				if err := we.executeTaskChain(ctx, nt, resultCh, pendingDeps, completed); err != nil {
+				if err := we.executeTaskChain(ctx, w, nt, resultCh, pendingDeps, completed, executedCount, totalTasks); err != nil {
 					select {
 					case errCh <- err: // capture first error
 					default: // error already sent, ignore
