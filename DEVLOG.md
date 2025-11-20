@@ -87,3 +87,17 @@
 - Implement pooling for the db
 - Implement better error handling and logging
 </details>
+
+<details>
+<summary><h3>19/11/2025</h3></summary>
+
+**Work done**
+- Add fan-in support to workflow execution
+- Fix execute workflow response
+
+**TODO**
+- Model the behavior for tasks to get the previous task result and use it
+- Finish workflow http task executing
+- Implement pooling for the db
+- Implement better error handling and logging
+</details>
