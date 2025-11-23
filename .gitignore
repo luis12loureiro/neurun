@@ -30,6 +30,13 @@ go.work.sum
 # Protobuf generated files (optional, see note)
 api/gen/**/*.pb.go
 
+# bin/executable files
+/bin/
+
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+# storage files
+internal/workflow/repository/storage/**/*.ndjson
+internal/workflow/repository/storage/**/*.sqlite

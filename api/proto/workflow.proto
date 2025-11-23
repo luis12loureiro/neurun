@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package neurun;
+
+option go_package = "github.com/luis12loureiro/neurun/api/gen/neurun";
+
+import "task.proto";
+
+
+service WorkflowService {
+    rpc CreateWorkflow(CreateWorkflowRequest) returns (WorkflowResponse);
+    rpc GetWorkflow(GetWorkflowRequest) returns (WorkflowResponse);
+    rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (stream ExecuteWorkflowResponse);
+}
+
+message CreateWorkflowRequest {
+    string name = 1;
+    optional string description = 2;
+    repeated CreateTaskRequest tasks = 3;
+}
+
+message GetWorkflowRequest {
+    string id = 1;
+}
+
+message WorkflowResponse {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string status = 4;
+    repeated Task tasks = 5;
+}
+
+message ExecuteWorkflowRequest {
+    string id = 1;
+}
+
+message ExecuteWorkflowResponse {
+    string workflowId = 1;
+    string taskId = 2;
+    string taskResult = 3;
+    WorkflowStatus workflowStatus = 4;
+    int32 totalTasks = 5;
+    int32 executedTasks = 6;
+}
+
+enum WorkflowStatus {
+  WORKFLOW_STATUS_UNSPECIFIED = 0;
+  WORKFLOW_STATUS_IDLE = 1;
+  WORKFLOW_STATUS_RUNNING = 2;
+  WORKFLOW_STATUS_COMPLETED = 3;
+  WORKFLOW_STATUS_FAILED = 4;
+}
