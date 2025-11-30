@@ -3,6 +3,9 @@
 # Set root directory to the script location's parent
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# Create gen folder if it doesn't exist
+mkdir -p "${ROOT_DIR}/api/gen"
+
 protoc \
   --proto_path="${ROOT_DIR}/api/proto" \
   --go_out="${ROOT_DIR}/api/gen" \
