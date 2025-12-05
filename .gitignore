@@ -44,3 +44,7 @@ internal/workflow/repository/storage/**/*.sqlite
 # macOS system files
 .DS_Store
 
+# Generated files
+apps/*/gen/
+
+
