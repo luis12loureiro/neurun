@@ -1,0 +1,66 @@
+<div class="workflow-editor-container">
+    <div class="editor-header">
+        <img src="neurun-logo.png" alt="Neurun Logo" class="editor-header-icon" width="32" height="32" />
+        <h2>Neurun - A workflow automation engine</h2>
+    </div>
+
+    <div class="editor-layout">
+        <!-- Canvas Section (Left) -->
+        <div class="canvas-section">
+            <div class="canvas-header">
+                <h3>{{ workflowName() }}</h3>
+            </div>
+            <div class="canvas-container" (mousedown)="onCanvasMouseDown($event)"
+                (mousemove)="onCanvasMouseMove($event)" (mouseup)="onCanvasMouseUp()" (mouseleave)="onCanvasMouseUp()">
+
+                <!-- SVG for connections -->
+                <svg class="connections-svg">
+                    @for (task of tasks(); track task.id) {
+                    @for (targetId of task.connections; track targetId) {
+                    <line [attr.x1]="task.isStart ? task.x + 35 : task.x + 60"
+                        [attr.y1]="task.isStart ? task.y + 70 : task.y + 85"
+                        [attr.x2]="getTask(targetId)!.isStart ? getTask(targetId)!.x + 35 : getTask(targetId)!.x + 60"
+                        [attr.y2]="getTask(targetId)!.isStart ? getTask(targetId)!.y : getTask(targetId)!.y + 10"
+                        class="connection-line" />
+                    }
+                    }
+                </svg>
+
+                <!-- Task nodes -->
+                @for (task of tasks(); track task.id) {
+                <div class="task-node" [class.start-node]="task.isStart" [class.pending]="task.status === 'pending'"
+                    [class.running]="task.status === 'running'" [class.completed]="task.status === 'completed'"
+                    [class.failed]="task.status === 'failed'" [style.left.px]="task.x" [style.top.px]="task.y"
+                    (mousedown)="onTaskMouseDown($event, task.id)">
+                    <div class="task-icon">
+                        @if (task.isStart) {
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        } @else {
+                        {{ task.name.charAt(task.name.length - 1) }}
+                        }
+                    </div>
+                    <div class="task-content">
+                        <h3>{{ task.name }}</h3>
+                        <span class="task-type">{{ task.type }}</span>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Results Section (Right) -->
+        <div class="results-section">
+            <div class="results-header">
+                <h3>Workflow Results</h3>
+            </div>
+            <div class="results-content">
+                <p class="empty-state">No execution results yet</p>
+            </div>
+        </div>
+    </div>
+    <footer class="editor-footer">
+        <p>Neurun © 2025 Luís Loureiro. All rights reserved.</p>
+    </footer>
+</div>
