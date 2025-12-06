@@ -67,7 +67,15 @@
               "buildTarget": "frontend:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "prebundle": {
+              "exclude": [
+                "google-protobuf",
+                "google-protobuf/google/protobuf/any_pb.js"
+              ]
+            }
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test"
