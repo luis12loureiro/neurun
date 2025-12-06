@@ -45,7 +45,7 @@ internal/workflow/repository/storage/**/*.sqlite
 .DS_Store
 
 # Generated files
-apps/*/gen/
-apps/*/proto-gen/
+**/gen/
+**/proto-gen/
 
 
