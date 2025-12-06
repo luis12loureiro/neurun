@@ -46,5 +46,6 @@ internal/workflow/repository/storage/**/*.sqlite
 
 # Generated files
 apps/*/gen/
+apps/*/proto-gen/
 
 
