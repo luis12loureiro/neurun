@@ -67,8 +67,7 @@ export class WorkflowCanvasComponent implements OnInit {
 
     this.workflowService.executeWorkflow(this.workflowId).subscribe({
       next: (result: TaskResult) => {
-        console.log('Task execution result:', result);
-        
+                
         // Add result to the list
         this.executionResults.update(results => [...results, result]);
 
