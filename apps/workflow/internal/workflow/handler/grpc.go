@@ -1,0 +1,113 @@
+package handler
+
+import (
+	"context"
+	"fmt"
+
+	pb "github.com/luis12loureiro/neurun/apps/workflow/gen"
+	"github.com/luis12loureiro/neurun/apps/workflow/internal/workflow"
+	"github.com/luis12loureiro/neurun/apps/workflow/internal/workflow/domain"
+)
+
+type handler struct {
+	pb.UnimplementedWorkflowServiceServer
+	s workflow.Service
+}
+
+func NewServer(s workflow.Service) pb.WorkflowServiceServer {
+	return &handler{s: s}
+}
+
+func (h *handler) CreateWorkflow(_ context.Context, in *pb.CreateWorkflowRequest) (*pb.WorkflowResponse, error) {
+	tasks := []*domain.Task{}
+	for _, t := range in.Tasks {
+		task, err := TaskFromProto(t)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+	w, err := domain.NewWorkflow(in.GetName(), in.GetDescription(), tasks)
+	if err != nil {
+		return nil, err
+	}
+	wf, err := h.s.Create(w)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.WorkflowResponse{
+		Id:          wf.ID,
+		Name:        wf.Name,
+		Description: wf.Description,
+		Status:      string(wf.Status),
+		Tasks:       convertNextToProto(wf.Tasks),
+	}, nil
+}
+
+func (h *handler) GetWorkflow(ctx context.Context, in *pb.GetWorkflowRequest) (*pb.WorkflowResponse, error) {
+	wf, err := h.s.Get(in.GetId())
+	if err != nil {
+		return nil, err
+	}
+	tasks := make([]*pb.Task, len(wf.Tasks))
+	for i, t := range wf.Tasks {
+		tasks[i] = TaskToProto(t)
+	}
+	return &pb.WorkflowResponse{
+		Id:          wf.ID,
+		Name:        wf.Name,
+		Description: wf.Description,
+		Status:      string(wf.Status),
+		Tasks:       tasks,
+	}, nil
+}
+
+func (h *handler) ExecuteWorkflow(req *pb.ExecuteWorkflowRequest, stream pb.WorkflowService_ExecuteWorkflowServer) error {
+	ctx := stream.Context()
+	resultCh := make(chan map[string]interface{})
+	errCh := make(chan error, 1)
+	go func() {
+		defer close(resultCh)
+		if err := h.s.Execute(ctx, req.GetId(), resultCh); err != nil {
+			errCh <- err
+		}
+	}()
+
+	for {
+		select {
+		case result, ok := <-resultCh:
+			if !ok {
+				// Channel closed, check for error
+				select {
+				case err := <-errCh:
+					return err // Return execution error to client
+				default:
+					return nil // Success
+				}
+			}
+			r, ok := result["output"].(string)
+			if !ok {
+				return fmt.Errorf("output is not a string, got type %T", result["output"])
+			}
+
+			taskID, _ := result["taskId"].(string)
+			workflowStatus, _ := result["workflowStatus"].(domain.WorklowStatus)
+			totalTasks, _ := result["totalTasks"].(int)
+			executedTasks, _ := result["executedTasks"].(int)
+
+			resp := &pb.ExecuteWorkflowResponse{
+				WorkflowId:     req.GetId(),
+				TaskId:         taskID,
+				TaskResult:     r,
+				WorkflowStatus: pb.WorkflowStatus(pb.WorkflowStatus_value["WORKFLOW_STATUS_"+string(workflowStatus)]),
+				TotalTasks:     int32(totalTasks),
+				ExecutedTasks:  int32(executedTasks),
+			}
+			if err := stream.Send(resp); err != nil {
+				return err
+			}
+		case err := <-errCh:
+			return err // Return error immediately
+		}
+	}
+}
