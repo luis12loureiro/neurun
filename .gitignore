@@ -27,11 +27,8 @@ go.work.sum
 # env file
 .env
 
-# Protobuf generated files (optional, see note)
-api/gen/**/*.pb.go
-
 # bin/executable files
-/bin/
+**/bin/
 
 # Editor/IDE
 .idea/
@@ -44,7 +41,7 @@ internal/workflow/repository/storage/**/*.sqlite
 # macOS system files
 .DS_Store
 
-# Generated files
+# Protobuf generated files (optional, see note)
 **/gen/
 **/proto-gen/
 
