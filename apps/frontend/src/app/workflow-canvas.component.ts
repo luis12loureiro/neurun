@@ -74,32 +74,36 @@ interface DragState {
       height: 100vh;
       display: flex;
       flex-direction: column;
-      background: #f5f3f0;
+      background: #fafafa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     .editor-header {
-      padding: 24px 40px;
-      border-bottom: 3px solid #2a2925;
-      background: #f5f3f0;
+      padding: 20px 32px;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       z-index: 10;
 
       h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 0 0 8px 0;
-        color: #2a2925;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: #111827;
+        letter-spacing: -0.01em;
       }
 
       .subtitle {
-        font-size: 0.9rem;
-        color: #6b6860;
+        font-size: 0.875rem;
+        color: #6b7280;
         margin: 0;
+        font-weight: 400;
       }
     }
 
     .canvas-container {
       flex: 1;
-      background: #e8e5e0;
+      background: linear-gradient(0deg, #f9fafb 0%, #ffffff 100%);
       position: relative;
       overflow: hidden;
       cursor: default;
@@ -116,81 +120,100 @@ interface DragState {
     }
 
     .connection-line {
-      stroke: #a8a89a;
-      stroke-width: 3;
+      stroke: #9ca3af;
+      stroke-width: 2;
       fill: none;
+      opacity: 0.6;
     }
 
     .task-node {
       position: absolute;
       width: 180px;
-      min-height: 110px;
-      background: #f5f3f0;
-      border: 3px solid #2a2925;
-      box-shadow: 6px 6px 0 rgba(42, 41, 37, 0.15);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       padding: 16px;
       cursor: grab;
       user-select: none;
       z-index: 2;
       transition: box-shadow 0.2s ease;
+      will-change: transform;
 
       &:active {
         cursor: grabbing;
-        box-shadow: 8px 8px 0 rgba(42, 41, 37, 0.25);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
       }
 
       &:hover {
-        box-shadow: 8px 8px 0 rgba(42, 41, 37, 0.25);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-color: #d1d5db;
       }
 
       &.pending {
-        border-color: #a8a89a;
+        border-left: 3px solid #9ca3af;
       }
 
       &.running {
-        border-color: #b4a582;
-        background: #faf7f2;
+        border-left: 3px solid #3b82f6;
+        background: #eff6ff;
       }
 
       &.completed {
-        border-color: #8a9f7f;
-        background: #f0f4ed;
+        border-left: 3px solid #10b981;
+        background: #f0fdf4;
       }
 
       &.failed {
-        border-color: #9d7070;
-        background: #f4ede8;
+        border-left: 3px solid #ef4444;
+        background: #fef2f2;
       }
     }
 
     .task-icon {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #2a2925;
-      width: 40px;
-      height: 40px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #ffffff;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #d1cbc5;
-      border: 2px solid #2a2925;
-      margin: 0 auto 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 6px;
+      margin: 0 0 12px 0;
+    }
+
+    .task-node.running .task-icon {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+
+    .task-node.completed .task-icon {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .task-node.failed .task-icon {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     }
 
     .task-content {
-      text-align: center;
-
       h3 {
         font-size: 0.9rem;
         font-weight: 600;
-        margin: 0 0 4px 0;
-        color: #2a2925;
+        margin: 0 0 6px 0;
+        color: #111827;
+        line-height: 1.3;
       }
 
       .task-type {
+        display: inline-block;
         font-size: 0.75rem;
-        color: #6b6860;
-        font-weight: 400;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
       }
     }
   `]
@@ -242,16 +265,21 @@ export class WorkflowCanvasComponent implements OnInit {
   onCanvasMouseMove(event: MouseEvent): void {
     if (!this.dragState.isDragging || !this.dragState.taskId) return;
 
+    event.preventDefault();
+    
     const newX = event.clientX - this.dragState.offsetX;
     const newY = event.clientY - this.dragState.offsetY;
 
-    this.tasks.update(tasks => 
-      tasks.map(task => 
-        task.id === this.dragState.taskId 
-          ? { ...task, x: newX, y: newY }
-          : task
-      )
-    );
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      this.tasks.update(tasks => 
+        tasks.map(task => 
+          task.id === this.dragState.taskId 
+            ? { ...task, x: newX, y: newY }
+            : task
+        )
+      );
+    });
   }
 
   onCanvasMouseUp(): void {
